@@ -145,6 +145,10 @@ h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0;letter-s
 .bar{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;font-size:13px}
 .bar .track{height:10px;background:var(--surface2);border-radius:6px;overflow:hidden}
 .bar .fill{height:100%;background:var(--accent);border-radius:6px}
+.bar.tap{cursor:pointer;padding:6px 0}.bar.tap:active{opacity:.7}
+.mitems{margin:2px 0 8px;padding:4px 10px;border-left:3px solid var(--line);background:var(--surface2);border-radius:0 10px 10px 0}
+.mitem{display:grid;grid-template-columns:30px 1fr auto;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;align-items:center}
+.mitem:last-child{border-bottom:0}.mitem .d{color:var(--muted)}.mitem .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mitem em{font-style:normal;color:var(--muted)}
 .chart{overflow-x:auto;margin-top:10px}
 .chart svg{display:block}
 
@@ -937,11 +941,19 @@ function renderMonth(){
     if((i+1)%5===0||i===0)s+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H+14)+'" font-size="9" text-anchor="middle" fill="var(--muted)">'+(i+1)+'</text>'});
   $("mChart").innerHTML=s+"</svg>";
   // kategóriák
-  var rows=Object.keys(byCat).map(function(c){return [CAT_NAME[c]||c,byCat[c],"var(--accent)"]});
+  var rows=Object.keys(byCat).map(function(c){return [CAT_NAME[c]||c,byCat[c],"var(--accent)",c]});
   S.settings.fixed.forEach(function(f){var am=f.id==="lelek"?lAmt:+f.amount;if(am>0)rows.push([f.name,am,"var(--muted)"])});
   rows.sort(function(a,b){return b[1]-a[1]});var mx=rows.length?rows[0][1]:1;
-  $("mCats").innerHTML=rows.length?rows.map(function(r){return '<div class="bar"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r[0])+'</span><div class="track"><div class="fill" style="width:'+(r[1]/mx*100).toFixed(1)+'%;background:'+r[2]+'"></div></div><b class="num">'+k(r[1])+'</b></div>'}).join("")+'<div class="legend"><span><i style="background:var(--accent)"></i>Napi szórás</span><span><i style="background:var(--muted)"></i>Fix lehúzás</span></div>':'<div class="empty">Ebben a hónapban még nem ment el lé.</div>';
+  var mEntries=S.entries.filter(function(e){return e.type==="out"&&e.cat!=="jutalom"&&e.date.slice(0,7)===mMonth}).sort(function(a,b){return a.date<b.date?1:-1});
+  function mItemRow(e){return '<div class="mitem"><span class="num d">'+e.date.slice(8)+'.</span><span class="n">'+esc(e.note||(e.big?"nagybevásárlás":CAT_NAME[e.cat]||e.cat))+'</span><b class="num">'+n0(e.amount)+'</b></div>'}
+  $("mCats").innerHTML=rows.length?rows.map(function(r){var id=r[3],items=id?mEntries.filter(function(e){return e.cat===id}):[];
+    return '<div class="bar'+(id?' tap':'')+'"'+(id?' data-mcat="'+id+'" role="button" aria-expanded="false"':'')+'><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r[0])+(id?' <small class="muted">('+items.length+')</small>':'')+'</span><div class="track"><div class="fill" style="width:'+(r[1]/mx*100).toFixed(1)+'%;background:'+r[2]+'"></div></div><b class="num">'+k(r[1])+'</b></div>'+
+      (id?'<div class="mitems" data-mlist="'+id+'" hidden>'+(items.length?items.map(mItemRow).join(""):'<div class="empty">Nincs tétel.</div>')+'</div>':'')}).join("")+
+    '<div class="legend"><span><i style="background:var(--accent)"></i>Napi tételek – koppints rá a részletekért</span><span><i style="background:var(--muted)"></i>Fix havi</span></div>'+
+    '<button type="button" class="btn ghost block" id="mAllBtn" style="margin-top:12px">Összes tétel ebben a hónapban ('+mEntries.length+')</button><div class="mitems" id="mAll" hidden>'+mEntries.map(function(e){return mItemRow(e).replace('<span class="n">','<span class="n"><em>'+esc(CAT_NAME[e.cat]||e.cat)+'</em> · ')}).join("")+'</div>':'<div class="empty">Ebben a hónapban még nem ment el pénz.</div>';
 }
+$("mCats").addEventListener("click",function(e){var all=e.target.closest("#mAllBtn");if(all){var box=$("mAll");box.hidden=!box.hidden;all.textContent=(box.hidden?"Összes tétel ebben a hónapban (":"Bezárom (")+box.children.length+")";return}
+  var b=e.target.closest("[data-mcat]");if(!b)return;var l=document.querySelector('[data-mlist="'+b.dataset.mcat+'"]');l.hidden=!l.hidden;b.setAttribute("aria-expanded",String(!l.hidden))});
 $("mPrev").onclick=function(){mMonth=shiftMonth(mMonth,-1);renderMonth()};
 $("mNext").onclick=function(){mMonth=shiftMonth(mMonth,1);renderMonth()};
 
