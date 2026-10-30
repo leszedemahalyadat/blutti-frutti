@@ -922,7 +922,7 @@ function renderMonth(){
   for(var d=1;d<=md.n;d++){var ds=mMonth+"-"+String(d).padStart(2,"0"),dd=dayData(ds);inc+=dd.income;daily.push(dd.income);if(dd.income>0)work++;
     dd.items.forEach(function(e){if(e.type==="out"){varOut+=e.amount;byCat[e.cat]=(byCat[e.cat]||0)+e.amount}})}
   var lF=lelekFixed(),lAmt=lF;if(lF>0){var hs=0;HAPPY.forEach(function(c){hs+=byCat[c]||0;delete byCat[c]});varOut-=hs;lAmt=Math.max(lF,hs)}
-  var fx=fixedSum()-fuF+fuAmt,out=varOut+fx,rest=inc-out;
+  var fx=fixedSum()-lF+lAmt,out=varOut+fx,rest=inc-out;
   $("mIn").textContent=k(inc);$("mOut").textContent=k(out);$("mRest").textContent=k(rest);$("mRest").style.color=rest<0?"var(--bad)":"var(--good)";
   $("mInSub").textContent=work?work+" nap, amikor jött zsé, átlag "+ft(inc/work)+" / nap":"Ebben a hónapban még nem jött lé.";
   // oszlopdiagram
