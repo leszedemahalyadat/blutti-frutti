@@ -296,6 +296,27 @@ nav.tabs button[aria-current="page"] svg{animation:bounce .35s ease-out forwards
 .shop-row .sv.pos{color:var(--good)}.shop-row .sv.neg{color:var(--bad)}
 .howto{display:grid;grid-template-columns:28px 1fr;gap:10px;font-size:14px;margin-top:10px}
 .howto>b{font-family:var(--f-display);font-size:22px;color:var(--accent);line-height:1}
+
+/* ---- Halloween-mód (okt. 31 – nov. 1, vagy kézzel) ---- */
+.hw{--surface2:#F3EEF9;--line:#E3D9F0;--accent:#B98BE0;--pink:#D9BDF0;--pink-bg:#F6EFFC}
+.hw .logo{display:none}.hw .hwlogo{display:block;animation:hwfloat 3s ease-in-out infinite}
+@keyframes hwfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hwlogo{display:none;width:60px;height:60px;flex:none}
+#boo{position:fixed;inset:0;z-index:60;background:#07040C;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;animation:booout .5s 1.4s forwards}
+#boo b{font-family:var(--f-display);font-weight:700;font-size:min(14vw,80px);color:#F57C1F;letter-spacing:.02em;white-space:nowrap;text-shadow:0 0 30px rgba(245,124,31,.8);animation:booin .9s cubic-bezier(.2,1.6,.4,1) both,shake .5s .25s}
+#boo span{color:#C9A7E8;font-size:15px;letter-spacing:.2em;text-transform:uppercase;animation:booin .7s .3s both}
+@keyframes booin{from{opacity:0;transform:scale(.2) rotate(-8deg)}to{opacity:1;transform:none}}
+@keyframes booout{to{opacity:0;visibility:hidden}}
+.bats{position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden}
+.bat{position:absolute;left:-12%;width:38px;height:22px;color:#111;animation:fly var(--d) linear var(--dl) forwards}
+.hw .bat{color:#1a1026}
+.bat svg{width:100%;height:100%;display:block;animation:flap .22s steps(2) infinite}
+.bat.rev{left:auto;right:-12%;animation-name:flyrev;transform:scaleX(-1)}
+@keyframes fly{0%{transform:translate(0,0)}25%{transform:translate(28vw,-18px)}50%{transform:translate(56vw,10px)}75%{transform:translate(84vw,-14px)}100%{transform:translate(125vw,0)}}
+@keyframes flyrev{0%{transform:translate(0,0) scaleX(-1)}25%{transform:translate(-28vw,-18px) scaleX(-1)}50%{transform:translate(-56vw,10px) scaleX(-1)}75%{transform:translate(-84vw,-14px) scaleX(-1)}100%{transform:translate(-125vw,0) scaleX(-1)}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.45)}}
+.hwseg{margin-top:10px}
+@media (prefers-reduced-motion:reduce){.hw .hwlogo,.hwlogo,#boo b,#boo span,.bat,.bat svg{animation:none}}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
 .crown{font-size:44px;line-height:1;margin-bottom:6px;display:inline-block;animation:pop .6s ease-out}
 .sheet.ok h3.big{font-size:30px}
@@ -332,7 +353,7 @@ nav.tabs button{font-size:9.5px;padding-inline:1px;letter-spacing:-.01em}
 
 <div class="app">
   <header class="top">
-    <div class="brand"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><ellipse cx="150" cy="238" rx="96" ry="62" transform="rotate(-28 150 238)" fill="#F9B8CF"/><ellipse cx="362" cy="238" rx="96" ry="62" transform="rotate(28 362 238)" fill="#F9B8CF"/><ellipse cx="172" cy="318" rx="68" ry="44" transform="rotate(-50 172 318)" fill="#FBD0DE"/><ellipse cx="340" cy="318" rx="68" ry="44" transform="rotate(50 340 318)" fill="#FBD0DE"/><path d="M256 196 L318 372 Q256 392 194 372 Z" fill="#A8E0BF"/><path d="M256 196 L290 300 Q256 312 222 300 Z" fill="#8FD4AC"/><circle cx="256" cy="160" r="52" fill="#FBE3D5"/><path d="M204 150 Q256 86 308 150 Q290 132 256 132 Q222 132 204 150 Z" fill="#7B4F3C"/><circle cx="238" cy="162" r="6" fill="#3B2A24"/><circle cx="274" cy="162" r="6" fill="#3B2A24"/><path d="M242 184 Q256 196 270 184" stroke="#C2607A" stroke-width="5" fill="none" stroke-linecap="round"/><line x1="318" y1="300" x2="398" y2="196" stroke="#C2607A" stroke-width="10" stroke-linecap="round"/><path d="M402 160 L412 184 L438 186 L418 202 L424 228 L402 214 L380 228 L386 202 L366 186 L392 184 Z" fill="#F7C948"/><path d="M236 372 L230 418 M276 372 L282 418" stroke="#FBE3D5" stroke-width="14" stroke-linecap="round"/><ellipse cx="226" cy="424" rx="16" ry="9" fill="#C2607A"/><ellipse cx="286" cy="424" rx="16" ry="9" fill="#C2607A"/></svg><div><h1>Blutti Frutti</h1><div class="date" id="hdrDate"></div></div></div>
+    <div class="brand"><div class="hwlogo" aria-hidden="true"><svg viewBox="0 0 512 512" aria-hidden="true"><ellipse cx="256" cy="440" rx="120" ry="18" fill="#EAF7EF"/><path d="M256 92 C166 92 116 160 116 250 L116 400 Q140 372 164 400 Q188 428 212 400 Q236 372 256 400 Q276 428 300 400 Q324 372 348 400 L348 250 C348 160 346 92 256 92 Z" fill="#F7F2FA" stroke="#E6DDF2" stroke-width="6"/><circle cx="218" cy="236" r="16" fill="#3B2A24"/><circle cx="294" cy="236" r="16" fill="#3B2A24"/><circle cx="224" cy="230" r="5" fill="#fff"/><circle cx="300" cy="230" r="5" fill="#fff"/><ellipse cx="256" cy="282" rx="14" ry="18" fill="#3B2A24"/><circle cx="190" cy="268" r="14" fill="#F9B8CF" opacity=".9"/><circle cx="322" cy="268" r="14" fill="#F9B8CF" opacity=".9"/><g transform="translate(348 318) scale(.55)"><rect x="-10" y="-70" width="20" height="30" rx="6" fill="#4F7A3A"/><ellipse cx="0" cy="0" rx="60" ry="50" fill="#F5A524"/><ellipse cx="-24" cy="0" rx="26" ry="46" fill="none" stroke="#D9861A" stroke-width="6"/><ellipse cx="24" cy="0" rx="26" ry="46" fill="none" stroke="#D9861A" stroke-width="6"/><path d="M-28 -12 L-8 -2 L-28 4Z M28 -12 L8 -2 L28 4Z M-30 18 Q0 40 30 18 L24 30 L12 22 L0 32 L-12 22 L-24 30Z" fill="#3B2A24"/></g></svg></div><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><ellipse cx="150" cy="238" rx="96" ry="62" transform="rotate(-28 150 238)" fill="#F9B8CF"/><ellipse cx="362" cy="238" rx="96" ry="62" transform="rotate(28 362 238)" fill="#F9B8CF"/><ellipse cx="172" cy="318" rx="68" ry="44" transform="rotate(-50 172 318)" fill="#FBD0DE"/><ellipse cx="340" cy="318" rx="68" ry="44" transform="rotate(50 340 318)" fill="#FBD0DE"/><path d="M256 196 L318 372 Q256 392 194 372 Z" fill="#A8E0BF"/><path d="M256 196 L290 300 Q256 312 222 300 Z" fill="#8FD4AC"/><circle cx="256" cy="160" r="52" fill="#FBE3D5"/><path d="M204 150 Q256 86 308 150 Q290 132 256 132 Q222 132 204 150 Z" fill="#7B4F3C"/><circle cx="238" cy="162" r="6" fill="#3B2A24"/><circle cx="274" cy="162" r="6" fill="#3B2A24"/><path d="M242 184 Q256 196 270 184" stroke="#C2607A" stroke-width="5" fill="none" stroke-linecap="round"/><line x1="318" y1="300" x2="398" y2="196" stroke="#C2607A" stroke-width="10" stroke-linecap="round"/><path d="M402 160 L412 184 L438 186 L418 202 L424 228 L402 214 L380 228 L386 202 L366 186 L392 184 Z" fill="#F7C948"/><path d="M236 372 L230 418 M276 372 L282 418" stroke="#FBE3D5" stroke-width="14" stroke-linecap="round"/><ellipse cx="226" cy="424" rx="16" ry="9" fill="#C2607A"/><ellipse cx="286" cy="424" rx="16" ry="9" fill="#C2607A"/></svg><div><h1>Blutti Frutti</h1><div class="date" id="hdrDate"></div></div></div>
   </header>
 
   <main>
@@ -517,6 +538,11 @@ nav.tabs button{font-size:9.5px;padding-inline:1px;letter-spacing:-.01em}
         <p class="muted" style="margin:4px 0 8px">Ezeket nem kell naponta beírni, a plafonból magától lejönnek.</p>
         <div id="fixedList"></div>
         <div class="field"><label><b>Összesen</b></label><b class="num" id="fixedSum" style="text-align:right"></b></div>
+      </div>
+      <div class="card">
+        <h2>Halloween-mód</h2>
+        <p class="muted" style="margin:4px 0 0">Okt. 31. és nov. 1. között magától bekapcsol: szellemecske, BOO, denevérek. Itt felülírhatod.</p>
+        <div class="seg three hwseg" role="group" aria-label="Halloween-mód"><button type="button" data-hw="auto" aria-pressed="true">Automata</button><button type="button" data-hw="on" aria-pressed="false">Be</button><button type="button" data-hw="off" aria-pressed="false">Ki</button></div>
       </div>
       <div class="card">
         <h2>Mentés, ha cserélsz telót</h2>
@@ -749,7 +775,7 @@ function animateBig(el,target){
   (function step(now){var k=Math.min(1,(now-t0)/dur);k=1-Math.pow(1-k,3);el.textContent=ft(from+(target-from)*k);if(k<1)requestAnimationFrame(step)})(t0);
 }
 function confetti(){if(RM)return;var c=document.createElement("canvas");c.className="confetti";document.body.appendChild(c);
-  var ctx=c.getContext("2d"),W=c.width=innerWidth,H=c.height=innerHeight,P=[],cols=["#F9B8CF","#A8E0BF","#F7C948","#E58AAB","#8FD4AC","#FBD0DE"];
+  var ctx=c.getContext("2d"),W=c.width=innerWidth,H=c.height=innerHeight,P=[],cols=hwOn()?["#C9A7E8","#F5A524","#FFFFFF","#F9B8CF","#B98BE0"]:["#F9B8CF","#A8E0BF","#F7C948","#E58AAB","#8FD4AC","#FBD0DE"];
   for(var i=0;i<140;i++)P.push({x:Math.random()*W,y:-20-Math.random()*H*.6,r:5+Math.random()*5,vx:(Math.random()-.5)*2.4,vy:2.5+Math.random()*3.5,c:cols[i%cols.length],a:Math.random()*6.3,va:(Math.random()-.5)*.25});
   var t0=performance.now();(function f(now){ctx.clearRect(0,0,W,H);P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.a+=p.va;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.7);ctx.restore()});
     if(now-t0<3400)requestAnimationFrame(f);else c.remove()})(t0)}
@@ -837,7 +863,7 @@ function showVerdict(d,live){
   }else{
     var left=lim-dd.spent,bonus=lg.streak===3||lg.streak===7||lg.streak===14||lg.streak===30;
     if(live&&d===today())confetti();
-    html='<div class="sheet ok" role="dialog" aria-modal="true" aria-labelledby="vh"><div class="crown" aria-hidden="true">🧚</div><div class="kicker">'+esc(pick(MSG_OK,seed))+'</div><h3 id="vh" class="big">Te vagy a legstenkebb Blutti Frutti tündér az egész világon, maximális respekt!</h3>'+
+    html='<div class="sheet ok" role="dialog" aria-modal="true" aria-labelledby="vh"><div class="crown" aria-hidden="true">'+(hwOn()?"👻":"🧚")+'</div><div class="kicker">'+(hwOn()?"Boo-respekt, spanom! ":"")+esc(pick(MSG_OK,seed))+'</div><h3 id="vh" class="big">Te vagy a legstenkebb Blutti Frutti tündér az egész világon, maximális respekt!</h3>'+
       '<p>'+when+' '+ft(dd.spent)+' zsé ment el a '+ft(lim)+' plafonból. Maradt: <b>'+ft(left)+'</b>.</p>'+
       '<p>'+ft(Math.round(left*0.1))+' beesett a bónusz zsébe, ezt nyugodtan elszórhatod.</p>'+
       '<p>Széria: <b>'+lg.streak+' nap</b>'+(bonus?' – szériabónusz, spanom!':'')+'</p>'+
@@ -1115,7 +1141,8 @@ var MISSIONS={
  daily:[
   {id:"d1",name:"Írj be ma legalább egy tételt",pts:5,check:function(t){var n=dayData(t).items.filter(function(e){return e.src!=="altegio"}).length;return {done:n>0,prog:n?n+" tétel":"még semmi"}}},
   {id:"d2",name:"Zárd le a napot a plafon alatt",pts:10,check:function(t){return {done:!!S.closed[t]&&verdict(t)==="ok",prog:S.closed[t]?"lezárva":"este nyomd meg a napzárást"}}},
-  {id:"d3",name:"Vedd be mind a 4 vitamint",pts:10,check:function(t){var n=vitCount(t);return {done:n===4,prog:n+" / 4 bent"}}}
+  {id:"d3",name:"Vedd be mind a 4 vitamint",pts:10,check:function(t){var n=vitCount(t);return {done:n===4,prog:n+" / 4 bent"}}},
+  {id:"hw",only:function(t){return t==="2026-10-31"},name:"Halloween: zárd le a napot plafon alatt",pts:31,check:function(t){return {done:!!S.closed[t]&&verdict(t)==="ok",prog:S.closed[t]?"lezárva":"csak ma, spanom"}}},
  ],
  weekly:[
   {id:"w1",name:"Zárj le 5 napot plafon alatt a héten",pts:25,check:function(t){var n=okDays(weekStart(t),t);return {done:n>=5,prog:n+" / 5 nap"}}},
@@ -1134,11 +1161,11 @@ function mname(m){return typeof m.name==="function"?m.name():m.name}
 function periodKey(p,t){return p==="daily"?t:p==="weekly"?weekStart(t):t.slice(0,7)}
 var missionToastT;
 function evalMissions(){var t=today(),newly=[];if(!S.missions)S.missions={};
-  ["daily","weekly","monthly"].forEach(function(p){MISSIONS[p].forEach(function(m){var key=p+":"+periodKey(p,t)+":"+m.id;if(S.missions[key])return;if(m.check(t).done){S.missions[key]=m.pts;newly.push(m)}})});
+  ["daily","weekly","monthly"].forEach(function(p){MISSIONS[p].filter(function(m){return !m.only||m.only(t)}).forEach(function(m){var key=p+":"+periodKey(p,t)+":"+m.id;if(S.missions[key])return;if(m.check(t).done){S.missions[key]=m.pts;newly.push(m)}})});
   if(newly.length){save();resetCache();var pts=newly.reduce(function(a,m){return a+m.pts},0);clearTimeout(missionToastT);
     missionToastT=setTimeout(function(){toast(newly.length===1?"Küldi kész: "+mname(newly[0])+" (+"+pts+" pont)":newly.length+" küldi kész, +"+pts+" pont, spanom!")},900)}}
 var qPeriod="daily",QT={daily:"Mai küldik",weekly:"Heti küldik",monthly:"Havi küldik"};
-function renderQuests(){var t=today(),list=MISSIONS[qPeriod],done=0;
+function renderQuests(){var t=today(),list=MISSIONS[qPeriod].filter(function(m){return !m.only||m.only(t)}),done=0;
   $("qTitle").textContent=QT[qPeriod];
   $("qList").innerHTML=list.map(function(m){var key=qPeriod+":"+periodKey(qPeriod,t)+":"+m.id,r=m.check(t),d=!!S.missions[key]||r.done;if(d)done++;
     return '<div class="q'+(d?" done":"")+'"><div class="ck">✓</div><div><div class="n">'+esc(mname(m))+'</div><div class="p">'+esc(d?"kész, spanom":r.prog)+'</div></div><div class="r num">+'+m.pts+'</div></div>'}).join("");
@@ -1156,13 +1183,35 @@ function go(tab){cur=tab;Object.keys(views).forEach(function(k){$(views[k]).hidd
   renderAll();window.scrollTo(0,0)}
 document.querySelector("nav.tabs").addEventListener("click",function(e){var b=e.target.closest("[data-tab]");if(b)go(b.dataset.tab)});
 
-function renderAll(){resetCache();evalMissions();renderToday();renderQuests();if(cur==="naplo"){renderCal();renderMonth()}if(cur==="beall")renderSettings();if(cur==="lelek")renderLelek();if(cur==="vit")renderVit();if(cur==="celok")renderGoals();if(cur==="bolt")renderBolt()}
+function renderAll(){resetCache();evalMissions();renderToday();renderQuests();if(typeof hwApply==="function"&&h1El)document.documentElement.classList.toggle("hw",hwOn());if(cur==="naplo"){renderCal();renderMonth()}if(cur==="beall")renderSettings();if(cur==="lelek")renderLelek();if(cur==="vit")renderVit();if(cur==="celok")renderGoals();if(cur==="bolt")renderBolt()}
 
 $("napCalBtn").onclick=function(){$("napCal").hidden=false;$("napMon").hidden=true;this.setAttribute("aria-pressed","true");$("napMonBtn").setAttribute("aria-pressed","false")};
 $("napMonBtn").onclick=function(){$("napCal").hidden=true;$("napMon").hidden=false;this.setAttribute("aria-pressed","true");$("napCalBtn").setAttribute("aria-pressed","false")};
 /* iOS billentyűzet: a felugró lapok a látható képernyőhöz igazodnak */
 if(window.visualViewport){var vvFix=function(){var vv=window.visualViewport,r=document.documentElement.style;r.setProperty("--vvh",vv.height+"px");r.setProperty("--vvt",vv.offsetTop+"px")};visualViewport.addEventListener("resize",vvFix);visualViewport.addEventListener("scroll",vvFix)}
-renderCats();renderQuick();renderAll();save();
+/* ---------- HALLOWEEN ---------- */
+var HW_DAYS={"2026-10-31":1,"2026-11-01":1},HW_PUMP='<svg viewBox="0 0 512 512" aria-hidden="true"><defs><radialGradient id="hwg" cx="50%" cy="55%" r="55%"><stop offset="0" stop-color="#FFB347"/><stop offset=".7" stop-color="#F57C1F"/><stop offset="1" stop-color="#B8520F"/></radialGradient></defs><rect x="236" y="72" width="40" height="70" rx="12" fill="#4F7A3A"/><ellipse cx="256" cy="300" rx="200" ry="170" fill="url(#hwg)"/><ellipse cx="176" cy="300" rx="80" ry="160" fill="none" stroke="#C45E12" stroke-width="10" opacity=".55"/><ellipse cx="336" cy="300" rx="80" ry="160" fill="none" stroke="#C45E12" stroke-width="10" opacity=".55"/><g fill="#FFE57A"><path d="M140 240 L215 280 L140 300 Z"/><path d="M372 240 L297 280 L372 300 Z"/><path d="M256 300 L224 352 L288 352 Z"/><path d="M130 370 Q256 460 382 370 L360 405 L328 385 L304 415 L272 388 L240 415 L208 385 L176 405 L152 370 Z"/></g></svg>';
+function hwOn(){var f=S.settings.hw;if(f==="on")return true;if(f==="off")return false;return !!HW_DAYS[today()]}
+var h1El=document.querySelector("header.top h1"),h1Text=h1El.textContent;
+function hwTitle(){h1El.textContent=h1Text;}
+function hwApply(){var on=hwOn();document.documentElement.classList.toggle("hw",on);hwTitle();
+  document.querySelectorAll(".hwseg button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.hw===(S.settings.hw||"auto"))});
+  if(on)hwStart();}
+document.querySelector(".hwseg").addEventListener("click",function(e){var b=e.target.closest("[data-hw]");if(!b)return;S.settings.hw=b.dataset.hw==="auto"?null:b.dataset.hw;save();hwApply();toast(hwOn()?"Halloween-mód be. Boo.":"Halloween-mód ki.")});
+var hwStarted=false,batT=null;
+function hwBoo(){if(RM)return;var key="hw-boo-"+today();try{if(localStorage.getItem(key))return}catch(e){}
+  var d=document.createElement("div");d.id="boo";d.innerHTML='<b>BOOOOO!</b><span>Happy Halloween, spanom</span>';document.body.appendChild(d);
+  setTimeout(function(){d.remove()},2100);try{localStorage.setItem(key,"1")}catch(e){}}
+var BAT='<svg viewBox="0 0 48 28" fill="currentColor"><path d="M0 14 Q8 0 18 10 Q21 4 24 10 Q27 4 30 10 Q40 0 48 14 Q38 12 32 22 Q28 17 24 24 Q20 17 16 22 Q10 12 0 14Z"/></svg>';
+function hwBats(){if(RM||document.hidden||!hwOn())return;var c=document.createElement("div");c.className="bats";var n=8+Math.floor(Math.random()*5),rev=Math.random()<.5,maxD=0;
+  for(var i=0;i<n;i++){var b=document.createElement("div");b.className="bat"+(rev?" rev":"");var dur=3+Math.random()*2.2,dl=Math.random()*1.4;maxD=Math.max(maxD,dur+dl);
+    b.style.top=(8+Math.random()*60)+"%";b.style.setProperty("--d",dur+"s");b.style.setProperty("--dl",dl+"s");var sz=26+Math.random()*22;b.style.width=sz+"px";b.style.height=(sz*.58)+"px";b.innerHTML=BAT;c.appendChild(b)}
+  document.body.appendChild(c);setTimeout(function(){c.remove()},(maxD+.3)*1000)}
+function hwSchedule(){clearTimeout(batT);if(!hwOn()||RM)return;batT=setTimeout(function(){hwBats();hwSchedule()},20000+Math.random()*20000)}
+function hwStart(){if(hwStarted)return;hwStarted=true;setTimeout(hwBoo,350);setTimeout(hwBats,4500);hwSchedule()}
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&hwOn())hwSchedule()});
+
+renderCats();renderQuick();renderAll();save();hwApply();
 setTimeout(checkPending,400);
 document.addEventListener("visibilitychange",function(){if(!document.hidden){renderAll();checkPending()}});
 })();
