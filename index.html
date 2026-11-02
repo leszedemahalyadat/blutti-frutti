@@ -590,6 +590,20 @@ body::before{background:transparent}
 .wn-btns.one{grid-template-columns:1fr}
 .wn-step{animation:slideIn .3s ease-out}
 @media (prefers-reduced-motion:reduce){#wn,.wn-box,.wn-emo,.wn-step,.ch-days div.on,.ch-days div.now,.ch-play,.gm.new .ic,.mm-grid button.ok,.mm-grid button.wrong{animation:none}}
+
+/* ===== bevétel kártya ===== */
+.inc-top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.inc-big{font-family:var(--f-display);font-weight:800;font-size:32px;white-space:nowrap;line-height:1;color:var(--good);margin-top:4px}
+.inc-sub{font-size:13px;color:var(--muted);margin-top:6px}
+.inc-sub b{color:var(--ink)}
+.inc-today{font-family:var(--f-display);font-weight:700;font-size:14px;color:var(--good);background:var(--good-bg);border-radius:999px;padding:6px 12px;white-space:nowrap}
+.inc-cats{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.inc-cats span{font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--surface2);color:var(--ink);border:1px solid var(--line)}
+.inc-cats span b{font-family:var(--f-display);margin-left:4px}
+.inc-bar{height:8px;border-radius:8px;background:var(--surface2);overflow:hidden;margin-top:10px;display:flex}
+.inc-bar i{display:block;height:100%}
+.inc-link{margin-top:10px;width:100%;padding:11px;font-size:14px}
+.inc-empty{color:var(--muted);font-size:14px;margin-top:4px}
 </style>
 
 <div class="orbs" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -618,6 +632,14 @@ body::before{background:transparent}
         <button type="button" class="act in" id="openIn"><b>+</b>Jött a zsé</button>
       </div>
       <div class="quickrow"><span class="label">Gyors szórás – egy koppintás</span><div class="quick" id="quickOut"></div></div>
+
+      <div class="card" id="incCard">
+        <div class="inc-top"><div><div class="label">Bejött zsé – ebben a hónapban</div><div class="inc-big num" id="incBig">0 Ft</div></div><div class="inc-today" id="incToday" hidden></div></div>
+        <div class="inc-sub" id="incSub"></div>
+        <div class="inc-bar" id="incBar" hidden></div>
+        <div class="inc-cats" id="incCats"></div>
+        <button type="button" class="btn ghost inc-link" id="incMore">Havi részletek, naponta</button>
+      </div>
 
       <div class="card">
         <h2>Ma ez ment</h2>
@@ -1142,7 +1164,7 @@ function renderToday(){
   $("stLabel").textContent=over?"Ennyivel több lé ment el a kelleténél:":"Ma még ennyi zsét szórhatsz el:";
   animateBig($("stBig"),Math.abs(left));
   $("stBar").style.width=(over?100:ratio*100).toFixed(1)+"%";
-  $("stSpent").textContent="Elszórva: "+ft(dd.spent);
+  $("stSpent").textContent="Elszórva: "+ft(dd.spent)+(dd.income?" · Bejött: +"+n0(dd.income):"");
   $("stLimit").textContent="Napi plafon: "+ft(lim);
   $("stMsg").textContent=over?"Ma nagyon bádog voltál. Ma már ne nyúlj a zséhez!":
     S.closed[t]?"Nap lezárva. Te vagy a legstenkebb Blutti Frutti tündér, maximális respekt!":
@@ -1155,7 +1177,7 @@ function renderToday(){
   if(dd.big>0)notes.push("Mai nagybevásárlás: "+ft(dd.big)+" – ez nem számít a napi plafonba.");
   pn.hidden=!notes.length;pn.textContent=notes.join(" ");
   var L=level(sc.pts),cur=LEVELS.filter(function(x){return x[1]===L.name})[0][0];
-  $("rwName").textContent=L.name;countUp($("rwPts"),sc.pts,function(p){return n0(p)+" pont"});renderChallenge();
+  $("rwName").textContent=L.name;countUp($("rwPts"),sc.pts,function(p){return n0(p)+" pont"});renderChallenge();renderIncome();
   $("rwBar").style.width=(L.next?Math.min(100,(sc.pts-cur)/(L.next[0]-cur)*100):100).toFixed(1)+"%";
   $("rwNext").textContent=L.next?"Még "+n0(L.next[0]-sc.pts)+" pont, és te leszel: "+L.next[1]:"Ennél feljebb nincs, spanom!";
   $("sStreak").textContent=sc.streak+" nap";$("sFund").textContent=ft(sc.fund);
@@ -1526,6 +1548,22 @@ function renderQuests(){var t=today(),list=MISSIONS[qPeriod].filter(function(m){
 }
 document.querySelector(".qseg").addEventListener("click",function(e){var b=e.target.closest("[data-qp]");if(!b)return;qPeriod=b.dataset.qp;
   document.querySelectorAll(".qseg button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});renderQuests()});
+
+
+/* ---------- bevétel kártya ---------- */
+var INC_COLS=["#5DBF84","#4F7BFF","#F7C948","#E58AAB","#B98BE0","#F28C38","#2B9FD9","#9AA0A6"];
+function incomeOf(ym){var tot=0,by={};S.entries.forEach(function(e){if(e.type!=="in"||e.date.slice(0,7)!==ym)return;tot+=e.amount;by[e.cat]=(by[e.cat]||0)+e.amount});return {tot:tot,by:by}}
+function renderIncome(){var t=today(),ym=t.slice(0,7),cur=incomeOf(ym),prev=incomeOf(shiftMonth(ym,-1)),td=dayData(t).income||0;
+  (typeof countUp==="function"?countUp:function(el,v){el.textContent=ft(v)})($("incBig"),cur.tot);
+  var tdEl=$("incToday");tdEl.hidden=!td;tdEl.textContent="Ma jött: +"+n0(td)+" Ft";
+  var sub;if(!cur.tot&&!prev.tot)sub='<span class="inc-empty">Még nem írtál be bevételt. A „+ Jött a zsé” gombbal írd be, ami jön, és itt látod összesítve.</span>';
+  else{var diff=cur.tot-prev.tot,pc=prev.tot?Math.round(diff/prev.tot*100):null;sub="Előző hónap: <b>"+ft(prev.tot)+"</b>"+(prev.tot&&cur.tot?" · most "+(diff>=0?"+":"−")+n0(Math.abs(diff))+" Ft"+(pc!=null?" ("+(pc>=0?"+":"")+pc+" %)":""):"");
+    var days=S.entries.filter(function(e){return e.type==="in"&&e.date.slice(0,7)===ym}).map(function(e){return e.date}).filter(function(d,i,a){return a.indexOf(d)===i}).length;if(days)sub+=" · "+days+" napon jött"}
+  $("incSub").innerHTML=sub;
+  var keys=Object.keys(cur.by).sort(function(a,b){return cur.by[b]-cur.by[a]});
+  $("incBar").hidden=!keys.length;$("incBar").innerHTML=keys.map(function(k2,i){return '<i style="width:'+(cur.by[k2]/cur.tot*100).toFixed(1)+'%;background:'+INC_COLS[i%INC_COLS.length]+'"></i>'}).join("");
+  $("incCats").innerHTML=keys.map(function(k2,i){return '<span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+INC_COLS[i%INC_COLS.length]+';margin-right:5px;vertical-align:middle"></i>'+esc(CAT_NAME[k2]||k2)+'<b>'+k(cur.by[k2])+'</b></span>'}).join("")}
+$("incMore").onclick=function(){go("naplo");$("napMonBtn").click();window.scrollTo(0,0)};
 
 /* ---------- fülek ---------- */
 
