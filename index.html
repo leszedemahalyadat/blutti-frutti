@@ -905,7 +905,7 @@ body::before{background:transparent}
     <section class="view" id="v-beall" hidden>
       <div class="card">
         <h2>Napi plafon</h2>
-        <p class="muted" style="margin:4px 0 8px">Ennyi zsét szórhatsz el naponta szabadon (kaja, buli, roller…). Számolás: várható havi lé − fix lehúzások − dugipénz, osztva 30-cal.</p>
+        <p class="muted" style="margin:4px 0 8px">Ennyi zsét szórhatsz el naponta szabadon (kaja, buli, roller…). Számolás: várható havi lé − fix lehúzások − dugipénz, osztva 30-cal. Ha egy hónapban a várhatónál több lé jön be, a plusz a hónap végéig szétosztva hozzáadódik a napi plafonhoz.</p>
         <div class="field"><label for="incExp">Várhatóan ennyi lé jön havonta<small id="incHint"></small></label><input id="incExp" inputmode="numeric"></div>
         <div class="field"><label for="saveGoal">Havi dugipénz<small>ezt félredugod</small></label><input id="saveGoal" inputmode="numeric"></div>
         <div class="field"><label>Javasolt napi plafon<small>a fentiekből számolva</small></label><b class="num" id="sugLimit" style="text-align:right"></b></div>
@@ -1133,7 +1133,12 @@ function dayData(d){
   return cache["d"+d]={spent:spent,income:inc,fundSpent:fund,hasOut:hasOut,items:items,big:big};
 }
 function bigShare(d){var s=0;S.entries.forEach(function(e){if(e.big&&e.date<=d&&d<addDays(e.date,7))s+=e.amount/7});return s}
-function dayLimitBase(d){return Math.max(0,baseLimit()-bigShare(d))}
+function daysInMonth(ym){var p=ym.split("-");return new Date(+p[0],+p[1],0).getDate()}
+function extraInfo(ym){if(cache["x"+ym])return cache["x"+ym];var E=expectedIncome(),run=0,parts=[],tot=0;
+  S.entries.filter(function(e){return e.type==="in"&&e.date.slice(0,7)===ym}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0}).forEach(function(e){var before=run;run+=e.amount;var over=Math.max(0,run-Math.max(E,before));if(over>0){var day=+e.date.slice(8,10),rem=daysInMonth(ym)-day+1;parts.push({from:e.date,per:over/rem});tot+=over}});
+  return cache["x"+ym]={tot:tot,parts:parts,exp:E}}
+function extraShare(d){var x=extraInfo(d.slice(0,7)),s=0;x.parts.forEach(function(p){if(p.from<=d)s+=p.per});return s}
+function dayLimitBase(d){return Math.max(0,baseLimit()-bigShare(d)+extraShare(d))}
 function limitFor(d){
   if(cache["l"+d]!=null)return cache["l"+d];
   var b=dayLimitBase(d),l=b;
@@ -1244,7 +1249,7 @@ function renderToday(){
     ratio>=.8?"Hé, fogy a zseton, lassíts!":
     dd.spent>0?"Sima ügy, van még della.":"Ma még egy zsetont se szórtál el.";
   var pn=$("penaltyNote");
-  var notes=[],bs=Math.round(bigShare(t));if(bs>0)notes.push("A heti nagybevásárlás miatt ma "+ft(bs)+"-tal kisebb a plafon, de a kaja már megvan.");
+  var notes=[],bs=Math.round(bigShare(t));var xs=Math.round(extraShare(t));if(xs>0)notes.push("Plusz lé jött a várt fölött, ezért ma "+ft(xs)+"-tal nagyobb a plafon.");if(bs>0)notes.push("A heti nagybevásárlás miatt ma "+ft(bs)+"-tal kisebb a plafon, de a kaja már megvan.");
   if(lim<dayLimitBase(t))notes.push("A tegnapi elszállás miatt ma "+ft(dayLimitBase(t)-lim)+"-tal kevesebb a zsé.");
   if(dd.big>0)notes.push("Mai nagybevásárlás: "+ft(dd.big)+" – ez nem számít a napi plafonba.");
   pn.hidden=!notes.length;pn.textContent=notes.join(" ");
@@ -1631,7 +1636,7 @@ function renderIncome(){var t=today(),ym=t.slice(0,7),cur=incomeOf(ym),prev=inco
   var sub;if(!cur.tot&&!prev.tot)sub='<span class="inc-empty">Még nem írtál be bevételt. A „+ Jött a zsé” gombbal írd be, ami jön, és itt látod összesítve.</span>';
   else{var diff=cur.tot-prev.tot,pc=prev.tot?Math.round(diff/prev.tot*100):null;sub="Előző hónap: <b>"+ft(prev.tot)+"</b>"+(prev.tot&&cur.tot?" · most "+(diff>=0?"+":"−")+n0(Math.abs(diff))+" Ft"+(pc!=null?" ("+(pc>=0?"+":"")+pc+" %)":""):"");
     var days=S.entries.filter(function(e){return e.type==="in"&&e.date.slice(0,7)===ym}).map(function(e){return e.date}).filter(function(d,i,a){return a.indexOf(d)===i}).length;if(days)sub+=" · "+days+" napon jött"}
-  $("incSub").innerHTML=sub;
+  var xi=extraInfo(ym);if(xi.tot>0)sub+=' · <b>+'+n0(xi.tot)+' Ft a várt fölött</b> → napi plafon ma +'+ft(Math.round(extraShare(t)));$("incSub").innerHTML=sub;
   var keys=Object.keys(cur.by).sort(function(a,b){return cur.by[b]-cur.by[a]});
   $("incBar").hidden=!keys.length;$("incBar").innerHTML=keys.map(function(k2,i){return '<i style="width:'+(cur.by[k2]/cur.tot*100).toFixed(1)+'%;background:'+INC_COLS[i%INC_COLS.length]+'"></i>'}).join("");
   $("incCats").innerHTML=keys.map(function(k2,i){return '<span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+INC_COLS[i%INC_COLS.length]+';margin-right:5px;vertical-align:middle"></i>'+esc(CAT_NAME[k2]||k2)+'<b>'+k(cur.by[k2])+'</b></span>'}).join("")}
