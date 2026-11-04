@@ -859,7 +859,7 @@ body::before{background:transparent}
       </div>
       <div class="card coll">
         <h2>Hogy működik?</h2>
-        <p class="muted" style="margin:6px 0 0">Minden <b>7 egymást követő nap</b>, amit lezársz és amibe írtál tételt, <b>1 zsetont</b> ér, spanom. Egy zseton = egy játék. Az első teljesített kihívás a Memóriát nyitja, a második a Tologatóst, a harmadik a Színkódot. A pontok a szintedhez adódnak.</p>
+        <p class="muted" style="margin:6px 0 0">Minden <b>7 egymást követő nap</b>, amit lezársz (akkor is, ha nem költöttél), <b>1 zsetont</b> ér, spanom. Egy zseton = egy játék. Az első teljesített kihívás a Memóriát nyitja, a második a Tologatóst, a harmadik a Színkódot. A pontok a szintedhez adódnak.</p>
       </div>
       <div class="card" id="gkHistCard" hidden>
         <div class="label">Eddigi játékaid</div>
@@ -1742,7 +1742,7 @@ function rpgOpenChest(x,y){var key=RPG.mode+":"+(RPG.dung?RPG.dung.id:"w")+":"+x
   rpgMsg(txt,2000);confetti();rpgSave();rpgHud()}
 function rpgDungPrompt(id){var d=DUNG[id],x=chState();if(S.rpg.unl[id]){rpgDialog(d.n,"Belépsz? "+d.hint+(S.rpg.boss[id]?" (A főellenséget már legyőzted, de a láda és a gyakorlás marad.)":""),[["Be, lácsó",function(){rpgEnterDung(id)}],["Még nem",null]]);return}
   if(x.avail>0)rpgDialog(d.n+" – zárva","Ez a kazamata egy zsetonba kerül, egyszer. Van "+x.avail+" zsetonod. Kinyitod?",[["Kinyitom (1 zseton)",function(){x.c.played++;S.rpg.unl[id]=1;save();rpgMsg("🔓 "+d.n+" megnyitva!",1500);rpgEnterDung(id)}],["Később",null]]);
-  else rpgDialog(d.n+" – zárva","A kazamatákat zseton nyitja: 7 lezárt nap egymás után, tételekkel. Most "+(x.streak.n%7)+" / 7 napnál tartasz.",[["Vágom",null]])}
+  else rpgDialog(d.n+" – zárva","A kazamatákat zseton nyitja: 7 lezárt nap egymás után. Most "+(x.streak.n%7)+" / 7 napnál tartasz.",[["Vágom",null]])}
 /* --- NPC --- */
 function rpgTalk(n){var p=RPG.p,q=p.q;
   if(n.id==="mester"){var k=p.kills.fustos||0;
@@ -2185,7 +2185,7 @@ function renderEntryAccts(t){var has=WACC().length>0,L=$("acctLabel"),G=$("accts
 $("accts").addEventListener("click",function(e){var b=e.target.closest("[data-acct]");if(!b)return;wAcctSel=wAcctSel===b.dataset.acct?null:b.dataset.acct;$("accts").querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.acct===wAcctSel)})});
 
 /* ---------- 7 napos kihívás ---------- */
-function chDayOk(d){return !!S.closed[d]&&dayData(d).items.length>0}
+function chDayOk(d){return !!S.closed[d]}
 function chStreak(){var t=today(),d=chDayOk(t)?t:addDays(t,-1),n=0,start=null;while(d>=S.trackStart&&chDayOk(d)){n++;start=d;d=addDays(d,-1)}return {n:n,start:start,todayOk:chDayOk(t)}}
 function chState(){if(!S.challenge)S.challenge={start:null,played:0,games:0,rounds:0,seen:0,stats:{},hist:[]};var c=S.challenge,st=chStreak();
   if(st.n===0){c.start=null;c.played=0;c.seen=0}else if(c.start!==st.start){c.start=st.start;c.played=0;c.seen=0}
@@ -2198,7 +2198,7 @@ function renderChallenge(){var x=chState(),n=x.streak.n,inRound=n%7,t=today();
   var act="",txt;
   if(x.avail>0){txt="Megvan a 7 nap, respekt! Kaptál egy zsetont, amit játékra válthatsz."+(x.avail>1?" ("+x.avail+" zseton vár)":"");act='<button class="btn block ch-play" type="button" data-go="jatek">🎮 Van zsetonod – irány a Játék fül!</button>';$("chTitle").textContent="Jutalom: játék, spanom!"}
   else{var left=7-inRound;$("chTitle").textContent=n>=7?"Következő játék: még "+left+" nap":"Zárj le 7 napot egymás után";
-    txt=x.streak.todayOk?"A mai nap megvan. Holnap is írj be mindent és zárd le a napot!":(S.closed[t]?"A mai nap le van zárva, de nincs beírt tétel – írj be legalább egyet, hogy számítson.":"Írj be ma minden kiadást és bevételt, este pedig nyomd meg a „Nap lezárása” gombot.");
+    txt=x.streak.todayOk?"A mai nap megvan. Holnap is írj be mindent és zárd le a napot!":(S.closed[t]?"A mai nap le van zárva.":"Este nyomd meg a „Nap lezárása” gombot – ha nem költöttél, az is egy lezárt nap.");
     txt+=n>=7?" A sorozatod él: "+n+" nap. Minden újabb 7 nap egy új zsetont ér.":n?" Már "+n+" nap megvan.":"";
     if(n===0&&x.c.games)txt="A sorozat megszakadt, de újrakezdheted. Egy nap kihagyása nullázza.";}
   $("chTxt").textContent=txt;$("chAction").innerHTML=act+(x.c.games?'<div class="ch-best">Teljesített kihívások: <b>'+(x.c.rounds||0)+'</b> · Játszott játékok: <b>'+x.c.games+'</b></div>':"")}
@@ -2208,7 +2208,7 @@ var GAMES=[{id:"rpg",emo:"🧚",name:"Tündér Quest",need:0,free:true,desc:"Ny�
 function gStats(id){var c=S.challenge||{};if(!c.stats)c.stats={};if(!c.stats[id])c.stats[id]={plays:0,best:0};return c.stats[id]}
 function renderGames(){var x=chState(),rounds=x.c.rounds||0,tok=x.avail;
   $("gkTok").textContent=tok;
-  $("gkTxt").textContent=tok>0?"Válaszd ki lent, mivel játszol. Egy játék egy zsetonba kerül.":"Zárj le 7 napot egymás után (tételekkel) és kapsz egy zsetont. Most "+(x.streak.n%7)+" / 7 nap van meg.";
+  $("gkTxt").textContent=tok>0?"Válaszd ki lent, mivel játszol. Egy játék egy zsetonba kerül.":"Zárj le 7 napot egymás után, és kapsz egy zsetont. Most "+(x.streak.n%7)+" / 7 nap van meg.";
   $("gkList").innerHTML=GAMES.map(function(g){var on=rounds>=g.need,st=gStats(g.id),fresh=on&&!st.plays;
     return '<div class="gm'+(on?"":" lock")+(fresh&&tok>0?" new":"")+'"><div class="ic">'+g.emo+'</div><div><h3>'+g.name+(fresh?' <span style="font-size:11px;color:var(--accent);font-weight:700;vertical-align:middle">ÚJ</span>':'')+'</h3><p>'+esc(g.desc)+'</p>'+
       (on?(g.free?'<div class="st"><span>Szint: <b>'+((S.rpg&&S.rpg.p&&S.rpg.p.lvl)||1)+'</b></span><span>Kazamata: <b>'+Object.keys((S.rpg&&S.rpg.boss)||{}).length+' / 3</b></span><span>Kulcs (zseton): <b>'+tok+'</b></span></div><button class="btn" type="button" data-play="'+g.id+'">▶ Játék</button>':'<div class="st"><span>Játszva: <b>'+st.plays+'</b></span><span>Rekord: <b>'+st.best+' '+g.unit+'</b></span></div>'+(tok>0?'<button class="btn" type="button" data-play="'+g.id+'">▶ Játszom (1 zseton)</button>':'<div class="lk">🪙 Nincs zseton – zárj le még '+(7-x.streak.n%7)+' napot</div>'))
@@ -2281,7 +2281,7 @@ function codeStart(){var COL=["🔴","🟠","🟡","🟢","🔵","🟣"],secret=
   c.addEventListener("mousedown",function(e){});c.addEventListener("mousemove",function(e){});window.addEventListener("mouseup",function(e){if(!$("game").hidden){}})})();
 
 /* ---------- Mi változott? (egyszeri útmutató) ---------- */
-var WN_VER="2",WN_STEPS=[{"e": "✨", "t": "Megújult a Blutti Frutti", "p": "Új, üveges kinézet a megszokott rózsaszín-zöld színekkel. Minden adatod megvan. Lapozz végig, 1 perc.", "l": []}, {"e": "📈", "t": "Új: Vagyon fül", "p": "Te írod be, mid van – és látod, hogyan gyarapszik.", "l": [["🏦", "Adj hozzá számlákat: bankszámla, készpénz, megtakarítás. Az egyenleget bármikor átírhatod."], ["🔗", "Beíráskor megadhatod, melyik számláról ment vagy hova jött a zsé – magától mozgatja."], ["📊", "Hónap végén „Havi összesítés rögzítése” → vonal mutatja a gyarapodást."], ["🤝", "Neked tartoznak: ha megjött a pénz, „Megjött” gomb, és bevételként bekerül."]]}, {"e": "🏆", "t": "Új: 7 napos kihívás", "p": "A Ma fülön, a Küldik felett.", "l": [["✅", "Egy nap akkor számít, ha írtál be tételt ÉS lezártad a napot."], ["7️⃣", "7 nap egymás után = 1 zseton. Egy kihagyott nap nullázza."], ["🪙", "A zsetont játékra válthatod a Játék fülön."]]}, {"e": "🎮", "t": "Új: Játék fül", "p": "Logikai játékok zsetonért – mind pontot ér a szintedhez.", "l": [["🧠", "Memória: 6 pár, kevés lépésből."], ["🔢", "Tologatós: rakd sorba a számokat."], ["🎨", "Színkód: fejtsd meg a 4 színű kódot."], ["🔒", "Sorban nyílnak: az 1., 2. és 3. teljesített kihívás után."]]}, {"e": "🌸", "t": "Apróságok", "p": "", "l": [["✕", "Törlésnél a sor kicsúszik, és alul van „Visszavonás”, ha véletlen volt."], ["💫", "Finom animációk mindenhol; a telefon „kevesebb mozgás” beállítása kikapcsolja őket."], ["⚙️", "Ezt az útmutatót a Gépházban bármikor újranézheted."]]}];
+var WN_VER="2",WN_STEPS=[{"e": "✨", "t": "Megújult a Blutti Frutti", "p": "Új, üveges kinézet a megszokott rózsaszín-zöld színekkel. Minden adatod megvan. Lapozz végig, 1 perc.", "l": []}, {"e": "📈", "t": "Új: Vagyon fül", "p": "Te írod be, mid van – és látod, hogyan gyarapszik.", "l": [["🏦", "Adj hozzá számlákat: bankszámla, készpénz, megtakarítás. Az egyenleget bármikor átírhatod."], ["🔗", "Beíráskor megadhatod, melyik számláról ment vagy hova jött a zsé – magától mozgatja."], ["📊", "Hónap végén „Havi összesítés rögzítése” → vonal mutatja a gyarapodást."], ["🤝", "Neked tartoznak: ha megjött a pénz, „Megjött” gomb, és bevételként bekerül."]]}, {"e": "🏆", "t": "Új: 7 napos kihívás", "p": "A Ma fülön, a Küldik felett.", "l": [["✅", "Egy nap akkor számít, ha este lezártad – akkor is, ha aznap nem költöttél semmit."], ["7️⃣", "7 lezárt nap egymás után = 1 zseton. Egy kihagyott nap nullázza."], ["🪙", "A zsetont játékra válthatod a Játék fülön."]]}, {"e": "🎮", "t": "Új: Játék fül", "p": "Logikai játékok zsetonért – mind pontot ér a szintedhez.", "l": [["🧠", "Memória: 6 pár, kevés lépésből."], ["🔢", "Tologatós: rakd sorba a számokat."], ["🎨", "Színkód: fejtsd meg a 4 színű kódot."], ["🔒", "Sorban nyílnak: az 1., 2. és 3. teljesített kihívás után."]]}, {"e": "🌸", "t": "Apróságok", "p": "", "l": [["✕", "Törlésnél a sor kicsúszik, és alul van „Visszavonás”, ha véletlen volt."], ["💫", "Finom animációk mindenhol; a telefon „kevesebb mozgás” beállítása kikapcsolja őket."], ["⚙️", "Ezt az útmutatót a Gépházban bármikor újranézheted."]]}];
 var wnI=0;
 function wnShow(){var st=WN_STEPS[wnI],last=wnI===WN_STEPS.length-1;
   $("wnKick").textContent=wnI===0?"Mi változott?":(wnI)+" / "+(WN_STEPS.length-1);
