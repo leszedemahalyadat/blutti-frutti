@@ -2367,7 +2367,7 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden){ren
     b.innerHTML='<div><b>Rakd a főképernyőre, spanom.</b> Lent a Megosztás gomb (négyzet, nyíllal felfelé) → <b>Főképernyőhöz adás</b>. Így lesz belőle igazi app.</div><button class="btn" type="button" style="padding:8px 12px;font-size:13px">Oké</button>';
     b.querySelector("button").onclick=function(){b.remove();try{localStorage.setItem("blutti-a2hs","1")}catch(e){}};
     var v=document.getElementById("v-ma");v.insertBefore(b,v.firstChild)}})();
-if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").then(function(reg){function chk(){try{reg.update()}catch(e){}}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk()});setInterval(chk,15*60*1000)}).catch(function(){});var reloaded=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(reloaded||!navigator.serviceWorker.controller)return;reloaded=true;location.reload()})})}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 </script>
 </body>
