@@ -1,4 +1,4 @@
-const C="blutti-v16";
+const C="blutti-v17";
 const FILES=["./","index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","splash-1170x2532.png","splash-1206x2622.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>Promise.all(FILES.map(u=>fetch(u,{cache:"reload"}).then(r=>{if(r.ok)return c.put(u,r.clone())}).catch(()=>{})))));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim()});

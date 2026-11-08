@@ -34,7 +34,14 @@ Teszthez kell: `npm i playwright && npx playwright install chromium`.
 
 ## 3. Hol tart most (2026-11-08)
 
-**Élesben:** commit `1c781fc`, `sw.js` = `blutti-v16`. Benne:
+**Élesben:** `sw.js` = `blutti-v17` (2026-11-08, Anna kérései + minitérkép-javítás). A v17 újdonságai:
+- **Fizunap** (`S.settings.payday`, Gépház): ha meg van adva, a napi plafon gördülő: (az időszak bevételei − `fixedSum()` − dugipénz − az időszakban eddig, a mai nap előttig elköltött) ÷ hátralévő napok a következő fizuig, 100-ra lefelé kerekítve (`rollLimit`). Időszak: `periodOf(d)` → `{s,e}` (fizunaptól a következő fizunapig, `e` kizárt); fizunap nélkül naptári hónap. A fizunap előtt 1–4 nappal beírt `fizu` már a következő időszaké (`incPeriodStart`). Csak `S.settings.paydayFrom`-tól él (`rollOn`), a régi napok értékelése nem változik. Gördülő módban nincs `bigShare` és nincs `carry` (a carry-kapcsoló rejtve). Ha az időszakban még nincs bevétel → régi 30 napos számolás + figyelmeztetés.
+- **Hol tartok kártya** a Ma fülön (`renderHt`, `#htCard`): maradt = bevétel − fix − dugipénz − elszórva (`periodSum`). Fix lehúzások lenyitva „✓ kiment” pipával (`S.fixPaid[időszak-kezdet][fixId]={a:számla,v:összeg}`) – kipipáláskor a költős számláról levonja, visszavéve visszaadja.
+- **Tervezett kiadás:** beíráskor „⏳ Még nem ment ki” (`e.plan`), kipipálva `e.paid=dátum`. Amíg `isPlan(e)`, `applyAcct` nem mozgatja a számlát. A tervezett tétel nem a napi szórásba (`dayData().plan`) megy, hanem gördülő módban a következő napoktól az időszaki keretbe.
+- **Költős számla** (`S.wealth.main`, ★ a Vagyonban, `mainAcct()`): kiadásnál alapból kijelölve.
+- „Mi változott?” útmutató: `WN_VER="4"`.
+
+Korábbi (v16-ig) tartalom:
 - Ma fül: napi plafon, költés/bevétel beírás, Bevétel kártya (havi összeg, mai, előző hónap, forrás szerinti bontás), 7 napos kihívás kártya, napzárás („Nap lezárása” – akkor is számít, ha nem költött).
 - **Jövedelem-modell (v3, Bluttinál ÉLES, a többi appban még nem):** a Gépházban nincs „várható havi jövedelem”, hanem **Jövedelem = az utolsó 30 nap beírt bevételei** (`income30(d)`). Napi plafon = (jövedelem − fix lehúzások − dugipénz) / 30,4, 500-ra lefelé kerekítve (`suggestedLimitAt`). Amíg a 30 napban nincs beírt bevétel, a régi `settings.incomeExpected` él fallbackként (`incomeFallback()`), és figyelmeztető sor jelenik meg.
 - **Bevétel beírásakor kötelező két koppintás:** „Hogyan jött?” (`VIAS`: Készpénz / Bankkártya-utalás / Revolut / Más → `e.via`, utolsó megjegyezve `S.lastVia`) és kategória (`IN_CATS`: Fizu, Kapott zsé, Mellékes, Más lé). A via-koppintás **nem** ment, a kategória-koppintás ment (ha van összeg). A Napló sor és a Bevétel kártya mutatja a módot.
@@ -43,8 +50,9 @@ Teszthez kell: `npm i playwright && npx playwright install chromium`.
 - Liquid glass téma Anna színeivel (világos, pasztell), animációk, egyszeri „Mi változott?” útmutató (`WN_VER="3"`, `S.settings.wn`).
 - Service worker frissítés-javítás: install `fetch(..., {cache:"reload"})`, lekérés `no-cache`, új verziónál a lap egyszer újratölt (`controllerchange`), előtérbe hozáskor `reg.update()`.
 
-**Forrásban kész, de MÉG NINCS KINT** (a `src/` egy lépéssel az élő előtt jár):
-- Minitérkép-méret javítás a Tündér Questben: `#game canvas#rpgMini{flex:none;width:72px;height:72px}` (az általános `#game canvas{width:100%}` szétnyújtotta). A következő kiadással megy (→ `blutti-v17`).
+**Forrásban kész, de még nincs kint:** semmi – a `src/` és az élő egyezik.
+
+**Gép-beállítás (fadeApu Macje):** Node.js a `~/.local/node/bin`-ben van (nincs a PATH-ban, nincs Homebrew, nincs `gh`) → `export PATH="$HOME/.local/node/bin:$PATH"` a tesztek előtt. A kiadás ellenőrzése `gh` helyett: `curl -s https://leszedemahalyadat.github.io/blutti-frutti/sw.js | head -c 60`.
 
 ## 4. Hogyan épül fel a kód (a nagy fájlon belül)
 

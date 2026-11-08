@@ -638,6 +638,20 @@ body::before{background:transparent}
 #game.rpg{background:linear-gradient(180deg,#FFF8FB,#FDE7EF)}
 #game.rpg .g-top>span{background:rgba(255,255,255,.88);border-radius:999px;padding:4px 12px;font-size:18px}
 #game.rpg .g-top .x{background:rgba(255,255,255,.88)}
+/* Hol tartok kártya, kiment-pipák, költős számla */
+.ht-big{font-family:var(--f-display);font-weight:800;font-size:32px;line-height:1;margin-top:4px;white-space:nowrap}
+.ht-rows{margin-top:10px}
+.ht-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ht-row:last-child{border-bottom:0}.ht-row small{display:block;color:var(--muted);font-size:12px}.ht-row b{white-space:nowrap}
+.ht-row.tap{cursor:pointer}.ht-row.tap:active{opacity:.7}
+.ht-list{margin:2px 0 8px;padding:4px 10px;border-left:3px solid var(--line);background:var(--surface2);border-radius:0 10px 10px 0}
+.ht-it{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.ht-it:last-child{border-bottom:0}.ht-it span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.paid{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.paid[aria-pressed="true"]{background:var(--good-bg);color:var(--good);border-color:transparent}
+.pend{display:block;margin-top:4px;border:0;background:var(--warn-bg);color:var(--warn);border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;text-align:left}
+.wstar{border:0;background:transparent;font-size:17px;line-height:1;color:var(--line);padding:0 2px;vertical-align:middle}.wstar[aria-pressed="true"]{color:#E0A100}
+#planRow{grid-template-columns:1fr}
 </style>
 
 <div class="orbs" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -673,6 +687,13 @@ body::before{background:transparent}
         <div class="inc-bar" id="incBar" hidden></div>
         <div class="inc-cats" id="incCats"></div>
         <button type="button" class="btn ghost inc-link" id="incMore">Havi részletek, naponta</button>
+      </div>
+
+      <div class="card" id="htCard">
+        <div class="label" id="htLabel">Hol tartok</div>
+        <div class="ht-big num" id="htBig">0 Ft</div>
+        <div class="inc-sub" id="htSub"></div>
+        <div class="ht-rows" id="htRows"></div>
       </div>
 
       <div class="card">
@@ -887,12 +908,13 @@ body::before{background:transparent}
     <section class="view" id="v-beall" hidden>
       <div class="card">
         <h2>Napi plafon</h2>
-        <p class="muted" style="margin:4px 0 8px">Ennyi zsét szórhatsz el naponta szabadon (kaja, buli, roller…). Számolás: jövedelem (az utolsó 30 nap beírt bevételei) − fix lehúzások − dugipénz, osztva 30-cal. Minden „+ Jött a zsé” beírás azonnal növeli a jövedelmet és vele a plafont.</p>
+        <p class="muted" id="plExplain" style="margin:4px 0 8px">Ennyi zsét szórhatsz el naponta szabadon (kaja, buli, roller…). Számolás: jövedelem (az utolsó 30 nap beírt bevételei) − fix lehúzások − dugipénz, osztva 30-cal. Minden „+ Jött a zsé” beírás azonnal növeli a jövedelmet és vele a plafont.</p>
+        <div class="field"><label for="payday">Fizunap<small>hányadikán jön a fizu? Ha megadod, fizutól fizuig számolok</small></label><input id="payday" inputmode="numeric" maxlength="2" placeholder="pl. 6"></div>
         <div class="field"><label>Jövedelem<small id="incHint">utolsó 30 nap, a „+ Jött a zsé” beírásokból</small></label><b class="num" id="incNow" style="text-align:right"></b></div><p class="muted" id="incFb" style="margin:-2px 0 8px" hidden></p>
         <div class="field"><label for="saveGoal">Havi dugipénz<small>ezt félredugod</small></label><input id="saveGoal" inputmode="numeric"></div>
         <div class="field"><label>Javasolt napi plafon<small>a fentiekből számolva</small></label><b class="num" id="sugLimit" style="text-align:right"></b></div>
         <div class="field"><label for="manLimit">Saját napi plafon<small>üresen hagyva a javasolt él</small></label><input id="manLimit" inputmode="numeric" placeholder="automata"></div>
-        <div class="toggle"><label for="carry">Ha elszáll a lé, másnap kisebb a plafon<br><small class="muted">Amennyivel túlmentél, annyit levon a másnapi zséből (legfeljebb a felét)</small></label><input type="checkbox" id="carry"></div>
+        <div class="toggle" id="carryRow"><label for="carry">Ha elszáll a lé, másnap kisebb a plafon<br><small class="muted">Amennyivel túlmentél, annyit levon a másnapi zséből (legfeljebb a felét)</small></label><input type="checkbox" id="carry"></div>
       </div>
       <div class="card">
         <h2>Havi fix lehúzások</h2>
@@ -950,6 +972,7 @@ body::before{background:transparent}
     <div class="catgrid" id="accts" hidden></div>
     <div class="label" id="viaLabel" hidden></div>
     <div class="catgrid" id="vias" hidden></div>
+    <div class="catgrid" id="planRow" hidden><button type="button" id="planBtn" aria-pressed="false">⏳ Még nem ment ki – csak tervezem</button></div>
     <div class="label" id="catLabel">Mire költötted?</div>
     <div class="catgrid" id="cats"></div>
     <input id="note" class="note" placeholder="Megjegyzés, ha akarsz" maxlength="60">
@@ -1112,22 +1135,42 @@ var cache={};
 function resetCache(){cache={}}
 function dayData(d){
   if(cache["d"+d])return cache["d"+d];
-  var spent=0,inc=0,fund=0,hasOut=false,items=[],big=0;
+  var spent=0,inc=0,fund=0,hasOut=false,items=[],big=0,plan=0;
   S.entries.forEach(function(e){if(e.date!==d)return;items.push(e);
-    if(e.type==="in")inc+=e.amount;else{hasOut=true;if(e.big){big+=e.amount}else if(e.cat==="jutalom")fund+=e.amount;else if(!(isHappy(e.cat)&&lelekFixed()>0))spent+=e.amount}});
-  return cache["d"+d]={spent:spent,income:inc,fundSpent:fund,hasOut:hasOut,items:items,big:big};
+    if(e.type==="in")inc+=e.amount;else{hasOut=true;if(e.big){big+=e.amount}else if(e.plan){plan+=e.amount}else if(e.cat==="jutalom")fund+=e.amount;else if(!(isHappy(e.cat)&&lelekFixed()>0))spent+=e.amount}});
+  return cache["d"+d]={spent:spent,income:inc,fundSpent:fund,hasOut:hasOut,items:items,big:big,plan:plan};
 }
-function bigShare(d){var s=0;S.entries.forEach(function(e){if(e.big&&e.date<=d&&d<addDays(e.date,7))s+=e.amount/7});return s}
+/* fizunap: fizutól fizuig tartó időszak, a plafon = ami maradt ÷ hátralévő napok */
+var HU_SH=new Intl.DateTimeFormat("hu-HU",{month:"short",day:"numeric"});
+function hShort(d){return HU_SH.format(parseYmd(d))}
+function payDay(){var p=+S.settings.payday;return p>=1&&p<=31?Math.floor(p):0}
+function dDiff(a,b){return Math.round((parseYmd(b)-parseYmd(a))/864e5)}
+function pdIn(ym,p){return ym+"-"+String(Math.min(p,monthDays(ym).n)).padStart(2,"0")}
+function periodOf(d){var p=payDay(),ym=d.slice(0,7);if(!p)return {s:ym+"-01",e:shiftMonth(ym,1)+"-01"};var s=pdIn(ym,p);if(d<s)s=pdIn(shiftMonth(ym,-1),p);return {s:s,e:pdIn(shiftMonth(s.slice(0,7),1),p)}}
+// a fizunap előtt 1–4 nappal beírt fizu már a következő időszaké
+function incPeriodStart(e){var pr=periodOf(e.date);return payDay()&&e.cat==="fizu"&&dDiff(e.date,pr.e)<=4?pr.e:pr.s}
+function isPlan(e){return !!e.plan&&!e.paid}
+function outCounts(e){return e.type==="out"&&e.cat!=="jutalom"&&!(isHappy(e.cat)&&lelekFixed()>0)}
+// bevétel és kiadás az időszakban, a „upto” nap előttig
+function periodSum(pr,upto){var key="ps"+pr.s+upto;if(cache[key])return cache[key];var inc=0,out=0,plan=0;
+  S.entries.forEach(function(e){if(e.date>=upto)return;if(e.type==="in"){if(incPeriodStart(e)===pr.s)inc+=e.amount}else if(e.date>=pr.s&&outCounts(e)){out+=e.amount;if(isPlan(e))plan+=e.amount}});
+  return cache[key]={inc:inc,out:out,plan:plan}}
+function rollOn(d){return !!payDay()&&!!S.settings.paydayFrom&&d>=S.settings.paydayFrom}
+function rollLimit(d){if(!rollOn(d))return null;var key="rl"+d;if(cache[key]!==undefined)return cache[key];
+  var pr=periodOf(d),inc=periodSum(pr,addDays(d,1)).inc;if(!inc)return cache[key]=null;
+  var left=inc-fixedSum()-(+S.settings.savingsGoal||0)-periodSum(pr,d).out;
+  return cache[key]=Math.max(0,Math.floor(left/Math.max(1,dDiff(d,pr.e))/100)*100)}
+function bigShare(d){if(rollOn(d))return 0;var s=0;S.entries.forEach(function(e){if(e.big&&e.date<=d&&d<addDays(e.date,7))s+=e.amount/7});return s}
 function income30(d){if(cache["i30"+d]!=null)return cache["i30"+d];var from=addDays(d,-30),s=0;S.entries.forEach(function(e){if(e.type==="in"&&e.date>=from&&e.date<=d)s+=e.amount});return cache["i30"+d]=s}
 function incomeBase(d){var i=income30(d);return i>0?i:(+S.settings.incomeExpected||0)}
 function incomeFallback(){return income30(today())===0&&+S.settings.incomeExpected>0}
-function suggestedLimitAt(d){var v=(incomeBase(d)-fixedSum()-(+S.settings.savingsGoal||0))/30.4;return Math.max(0,Math.floor(v/500)*500)}
+function suggestedLimitAt(d){var r=rollLimit(d);if(r!=null)return r;var v=(incomeBase(d)-fixedSum()-(+S.settings.savingsGoal||0))/30.4;return Math.max(0,Math.floor(v/500)*500)}
 function baseLimitAt(d){return S.settings.manualLimit!=null?S.settings.manualLimit:suggestedLimitAt(d)}
 function dayLimitBase(d){return Math.max(0,baseLimitAt(d)-bigShare(d))}
 function limitFor(d){
   if(cache["l"+d]!=null)return cache["l"+d];
   var b=dayLimitBase(d),l=b;
-  if(S.settings.carry&&d>S.trackStart){var p=addDays(d,-1),pd=dayData(p),pl=limitFor(p);
+  if(S.settings.carry&&d>S.trackStart&&!rollOn(d)){var p=addDays(d,-1),pd=dayData(p),pl=limitFor(p);
     if(evaluated(p)&&pd.spent>pl)l=b-Math.min(pd.spent-pl,b*0.5);}
   return cache["l"+d]=Math.max(0,Math.round(l));
 }
@@ -1182,12 +1225,15 @@ var QUICK_OUT=["csoki","kave","progi","kaja","mas"];
 var AMT_PRESETS={out:[1000,2000,5000,10000],"in":[5000,10000,20000,50000]};
 function renderQuick(){$("quickOut").innerHTML=QUICK_OUT.map(function(c){return '<button type="button" class="hot" data-qc="'+c+'">'+esc(CAT_NAME[c])+'</button>'}).join("")}
 $("quickOut").addEventListener("click",function(e){var b=e.target.closest("[data-qc]");if(b)openEntry("out",b.dataset.qc)});
+var planSel=false;
+function renderPlan(t){planSel=false;$("planRow").hidden=t!=="out";$("planBtn").setAttribute("aria-pressed","false")}
+$("planBtn").onclick=function(){planSel=!planSel;this.setAttribute("aria-pressed",String(planSel))};
 function submitEntry(){var f=$("addForm");if(f.requestSubmit)f.requestSubmit();else f.dispatchEvent(new Event("submit",{cancelable:true}))}
 $("amtQuick").addEventListener("click",function(e){var b=e.target.closest("[data-a]");if(!b)return;$("amt").value=n0(+b.dataset.a);if(cat)submitEntry();else{toast("Most nyomd meg, mire ment");}});
 var viaSel=null;
 function renderVias(t){var L=$("viaLabel"),G=$("vias");L.hidden=G.hidden=(t!=="in");if(t!=="in"){viaSel=null;return}viaSel=S.lastVia||null;L.textContent="Hogyan jött? (kp, kártya, Revolut)";G.innerHTML=VIAS.map(function(v){return '<button type="button" data-via="'+v[0]+'" aria-pressed="'+(v[0]===viaSel)+'">'+esc(v[1])+'</button>'}).join("")}
 $("vias").addEventListener("click",function(e){var b=e.target.closest("[data-via]");if(!b)return;viaSel=b.dataset.via;$("vias").querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.via===viaSel)})});
-function openEntry(t,presetCat){type=t;cat=presetCat||null;renderCats();renderVias(t);renderEntryAccts(t);
+function openEntry(t,presetCat){type=t;cat=presetCat||null;renderCats();renderVias(t);renderEntryAccts(t);renderPlan(t);
   $("amtQuick").innerHTML=AMT_PRESETS[t].map(function(a){return '<button type="button" data-a="'+a+'">'+n0(a)+'</button>'}).join("");
   $("entryTitle").textContent=t==="out"?"Elment a lé":"Jött a zsé";
   $("catLabel").textContent=t==="out"?"Mire ment el a della?":"Mi volt ez a zsé? (fizu, kapott…)";
@@ -1216,7 +1262,7 @@ $("amt").addEventListener("input",function(){var v=digits(this.value);this.value
 function itemRow(e,del){
   var sign=e.type==="in"?"+":"−";
   var sub=CAT_NAME[e.cat]||e.cat;if(e.note)sub+=" · "+e.note;
-  return '<div class="item"><div class="t"><b>'+esc(CAT_NAME[e.cat]||e.cat)+'</b><small>'+esc(e.type==="in"?([e.note,VIA_NAME[e.via]].filter(Boolean).join(" · ")||"jött"):(e.note||"elment"))+'</small></div><div class="a num '+(e.type==="in"?"in":"out")+'">'+sign+n0(e.amount)+'</div>'+(del?'<button class="x" type="button" aria-label="Törlés" data-del="'+e.id+'">×</button>':'<span></span>')+'</div>';
+  return '<div class="item"><div class="t"><b>'+esc(CAT_NAME[e.cat]||e.cat)+'</b><small>'+esc(e.type==="in"?([e.note,VIA_NAME[e.via]].filter(Boolean).join(" · ")||"jött"):(e.note||"elment")+(e.plan&&e.paid?" · kiment "+hShort(e.paid):""))+'</small>'+(isPlan(e)?'<button type="button" class="pend" data-planpaid="'+e.id+'">⏳ még nem ment ki – koppints, ha kiment</button>':'')+'</div><div class="a num '+(e.type==="in"?"in":"out")+'">'+sign+n0(e.amount)+'</div>'+(del?'<button class="x" type="button" aria-label="Törlés" data-del="'+e.id+'">×</button>':'<span></span>')+'</div>';
 }
 
 var lastAdded=null;
@@ -1233,16 +1279,16 @@ function renderToday(){
   $("stLimit").textContent="Napi plafon: "+ft(lim);
   $("stMsg").textContent=over?"Ma nagyon bádog voltál. Ma már ne nyúlj a zséhez!":
     S.closed[t]?"Nap lezárva. Te vagy a legstenkebb Blutti Frutti tündér, maximális respekt!":
-    lim===0?"Még nincs beírt bevétel, ezért nincs plafon. Nyomd meg a „+ Jött a zsé” gombot, és írd be, mennyi jött.":
+    rollLimit(t)===0&&S.settings.manualLimit==null?"A fizuból erre az időszakra már nem maradt szabad lé. Ami most elmegy, az a következő fizuból hiányzik.":lim===0?"Még nincs beírt bevétel, ezért nincs plafon. Nyomd meg a „+ Jött a zsé” gombot, és írd be, mennyi jött.":
     ratio>=.8?"Hé, fogy a zseton, lassíts!":
     dd.spent>0?"Sima ügy, van még della.":"Ma még egy zsetont se szórtál el.";
   var pn=$("penaltyNote");
-  var notes=[],bs=Math.round(bigShare(t));if(incomeFallback())notes.push("Új: a plafont mostantól a beírt bevételekből számolom (utolsó 30 nap). Amíg nem írsz be bevételt, a régi beállítás él: "+ft(+S.settings.incomeExpected)+". Írd be a fizut a „+ Jött a zsé” gombbal, spanom.");if(bs>0)notes.push("A heti nagybevásárlás miatt ma "+ft(bs)+"-tal kisebb a plafon, de a kaja már megvan.");
+  var notes=[],bs=Math.round(bigShare(t));if(rollOn(t)&&rollLimit(t)==null&&S.settings.manualLimit==null)notes.push("Ebben a fizu-időszakban még nincs beírt bevétel, ezért addig a régi, 30 napos számolás él. Ha megjött a fizu, írd be a „+ Jött a zsé” gombbal.");else if(!rollOn(t)&&incomeFallback())notes.push("Új: a plafont mostantól a beírt bevételekből számolom (utolsó 30 nap). Amíg nem írsz be bevételt, a régi beállítás él: "+ft(+S.settings.incomeExpected)+". Írd be a fizut a „+ Jött a zsé” gombbal, spanom.");if(bs>0)notes.push("A heti nagybevásárlás miatt ma "+ft(bs)+"-tal kisebb a plafon, de a kaja már megvan.");
   if(lim<dayLimitBase(t))notes.push("A tegnapi elszállás miatt ma "+ft(dayLimitBase(t)-lim)+"-tal kevesebb a zsé.");
   if(dd.big>0)notes.push("Mai nagybevásárlás: "+ft(dd.big)+" – ez nem számít a napi plafonba.");
   pn.hidden=!notes.length;pn.textContent=notes.join(" ");
   var L=level(sc.pts),cur=LEVELS.filter(function(x){return x[1]===L.name})[0][0];
-  $("rwName").textContent=L.name;countUp($("rwPts"),sc.pts,function(p){return n0(p)+" pont"});renderChallenge();renderIncome();
+  $("rwName").textContent=L.name;countUp($("rwPts"),sc.pts,function(p){return n0(p)+" pont"});renderChallenge();renderIncome();renderHt();
   $("rwBar").style.width=(L.next?Math.min(100,(sc.pts-cur)/(L.next[0]-cur)*100):100).toFixed(1)+"%";
   $("rwNext").textContent=L.next?"Még "+n0(L.next[0]-sc.pts)+" pont, és te leszel: "+L.next[1]:"Ennél feljebb nincs, spanom!";
   $("sStreak").textContent=sc.streak+" nap";$("sFund").textContent=ft(sc.fund);
@@ -1262,12 +1308,12 @@ $("addForm").addEventListener("submit",function(e){
   if(type==="in"&&!viaSel){toast("Nyomd meg, hogyan jött: kp, kártya vagy Revolut");return}
   closeEntry();
   var t=today(),before=dayData(t).spent>limitFor(t);
-  lastAdded=uid();var _ne={id:lastAdded,date:t,type:type,amount:a,cat:cat,note:$("note").value.trim()};if(wAcctSel){_ne.acct=wAcctSel;S[type==="in"?"lastInAcct":"lastOutAcct"]=wAcctSel}if(type==="in"&&viaSel){_ne.via=viaSel;S.lastVia=viaSel}S.entries.push(_ne);applyAcct(_ne,1);
+  lastAdded=uid();var _ne={id:lastAdded,date:t,type:type,amount:a,cat:cat,note:$("note").value.trim()};if(wAcctSel){_ne.acct=wAcctSel;S[type==="in"?"lastInAcct":"lastOutAcct"]=wAcctSel}if(type==="in"&&viaSel){_ne.via=viaSel;S.lastVia=viaSel}if(type==="out"&&planSel)_ne.plan=true;S.entries.push(_ne);applyAcct(_ne,1);
   if(type==="out"&&cat==="jutalom"&&a>score().fund+0){toast("Nincs ennyi bónusz zsé – sima szórásként beírva");S.entries[S.entries.length-1].cat="mas"}
   save();resetCache();$("amt").value="";$("note").value="";
   var after=dayData(t).spent>limitFor(t);
   renderAll();
-  if(!before&&after){S.ack[t]=true;save();showVerdict(t,true)}else toast(type==="out"?"Lé elkönyvelve":"Zsé beírva");
+  if(!before&&after){S.ack[t]=true;save();showVerdict(t,true)}else toast(_ne.plan?"Betettem a még ki nem mentek közé – a Hol tartok kártyán pipálod ki":type==="out"?"Lé elkönyvelve":"Zsé beírva");
 });
 document.addEventListener("click",function(e){
   var d=e.target.closest("[data-del]");if(d){var de=S.entries.filter(function(x){return x.id===d.dataset.del})[0];if(!de)return;var row=d.closest(".item,.shop-row");
@@ -1345,6 +1391,36 @@ function renderDay(){
   $("dayList").innerHTML=dd.items.length?dd.items.map(function(e){return itemRow(e,true)}).join(""):'<div class="empty">Semmi mozgás ezen a napon.</div>';
 }
 
+/* ---------- HOL TARTOK (fizuig / hónap végéig) ---------- */
+var htOpen={};
+function mainAcct(){var id=S.wealth&&S.wealth.main;return id&&WACC().filter(function(a){return a.id===id})[0]||null}
+function htRow(n,v,sub,key){return '<div class="ht-row'+(key?' tap" role="button" data-ht="'+key+'" aria-expanded="'+!!htOpen[key]+'"':'"')+'><div>'+n+(sub?'<small>'+sub+'</small>':'')+'</div><b class="num">'+v+'</b></div>'}
+function renderHt(){var t=today(),pd=payDay(),pr=periodOf(t),ps=periodSum(pr,addDays(t,1)),fx=fixedSum(),sv=+S.settings.savingsGoal||0,rest=ps.inc-fx-sv-ps.out,left=dDiff(t,pr.e);
+  var paid=S.fixPaid&&S.fixPaid[pr.s]||{},fl=S.settings.fixed.filter(function(f){return f.id!=="lelek"&&+f.amount>0}),nPaid=fl.filter(function(f){return paid[f.id]}).length;
+  var pl=S.entries.filter(function(e){return e.type==="out"&&isPlan(e)}).sort(function(a,b){return a.date<b.date?1:-1}),plSum=pl.reduce(function(a,e){return a+e.amount},0),ma=mainAcct();
+  $("htLabel").textContent=pd?"Hol tartok – a következő fizuig":"Hol tartok – ebben a hónapban";
+  var b=$("htBig");b.textContent=(rest<0?"−":"")+ft(Math.abs(rest));b.style.color=rest<0?"var(--bad)":"var(--good)";
+  $("htSub").innerHTML=(rest<0?"Ennyivel több ment el, mint amennyi bejött. ":"Ennyi lé maradt összesen. ")+(pd?"Következő fizu: <b>"+hShort(pr.e)+"</b>, még <b>"+left+" nap</b>.":"Még <b>"+left+" nap</b> a hónapból. Ha a Gépházban megadod, hányadikán jön a fizu, fizutól fizuig számolok.");
+  var h=htRow("Bejött","+"+n0(ps.inc),pd?hShort(pr.s)+" óta beírt bevételek":"ebben a hónapban beírt bevételek");
+  h+=htRow("Fix lehúzások","−"+n0(fx),fl.length?nPaid+" / "+fl.length+" már kiment · koppints a kipipáláshoz":"a Gépházban adhatod meg",fl.length?"fix":null);
+  if(fl.length&&htOpen.fix)h+='<div class="ht-list">'+fl.map(function(f){var p=!!paid[f.id];return '<div class="ht-it"><span>'+esc(f.name)+'</span><b class="num">'+n0(f.amount)+'</b><button type="button" class="paid" data-fxpaid="'+f.id+'" aria-pressed="'+p+'">'+(p?"✓ kiment":"még nem")+'</button></div>'}).join("")+'</div>';
+  if(sv)h+=htRow("Dugipénz","−"+n0(sv),"ezt félredugod");
+  h+=htRow("Elszórva eddig","−"+n0(ps.out),"napi szórás + nagybevásárlás"+(ps.plan?" + tervezett":""));
+  if(pl.length){h+=htRow("Még nem ment ki",n0(plSum),pl.length+" tervezett kiadás · koppints rá","plan");
+    if(htOpen.plan)h+='<div class="ht-list">'+pl.map(function(e){return '<div class="ht-it"><span>'+hShort(e.date)+' · '+esc(e.note||CAT_NAME[e.cat]||e.cat)+'</span><b class="num">'+n0(e.amount)+'</b><button type="button" class="paid" data-planpaid="'+e.id+'" aria-pressed="false">Kiment</button></div>'}).join("")+'</div>'}
+  if(ma)h+=htRow(esc(ma.name)+" egyenlege",ft(+S.wealth.acc[ma.id]||0),"a Vagyonból · a kiadások magától lejönnek róla");
+  $("htRows").innerHTML=h}
+$("htRows").addEventListener("click",function(e){var r=e.target.closest("[data-ht]");if(r){htOpen[r.dataset.ht]=!htOpen[r.dataset.ht];renderHt();return}
+  var b=e.target.closest("[data-fxpaid]");if(!b)return;var id=b.dataset.fxpaid,f=S.settings.fixed.filter(function(x){return x.id===id})[0];if(!f)return;
+  var pr=periodOf(today());if(!S.fixPaid)S.fixPaid={};var m=S.fixPaid[pr.s]||(S.fixPaid[pr.s]={});
+  if(m[id]){var o=m[id];if(o.a&&S.wealth.acc[o.a]!=null)S.wealth.acc[o.a]+=o.v;delete m[id];save();renderAll();toast(f.name+": mégsem ment ki"+(o.a?" – visszaraktam: "+acctName(o.a):""));return}
+  var ma=mainAcct();m[id]={a:ma?ma.id:"",v:+f.amount||0};if(ma)S.wealth.acc[ma.id]=(+S.wealth.acc[ma.id]||0)-m[id].v;
+  Object.keys(S.fixPaid).forEach(function(k){if(k<addDays(pr.s,-100))delete S.fixPaid[k]});
+  save();renderAll();toast("Kiment: "+f.name+(ma?" – levontam: "+ma.name:""))});
+document.addEventListener("click",function(e){var b=e.target.closest("[data-planpaid]");if(!b)return;var x=S.entries.filter(function(y){return y.id===b.dataset.planpaid})[0];if(!x||x.paid)return;
+  x.paid=today();applyAcct(x,1);save();resetCache();renderAll();
+  toast("Kiment: "+(x.note||CAT_NAME[x.cat]||x.cat)+(x.acct?" – levontam: "+acctName(x.acct):""),function(){applyAcct(x,-1);delete x.paid;save();resetCache();renderAll()})});
+
 /* ---------- HÓNAP ---------- */
 var mMonth=today().slice(0,7);
 function renderMonth(){
@@ -1386,7 +1462,7 @@ function renderSettings(){
   var st=S.settings;
   refreshIncomeNow();
   setVal("saveGoal",st.savingsGoal?n0(st.savingsGoal):"");$("saveGoal").placeholder="0";
-  setVal("manLimit",st.manualLimit!=null?n0(st.manualLimit):"");
+  setVal("manLimit",st.manualLimit!=null?n0(st.manualLimit):"");setVal("payday",st.payday||"");
   $("sugLimit").textContent=ft(suggestedLimit())+" / nap";
   $("carry").checked=!!st.carry;
   if(!$("fixedList").children.length){
@@ -1398,10 +1474,15 @@ function renderSettings(){
 }
 function setVal(id,v){var el=$(id);if(document.activeElement!==el)el.value=v}
 function numInput(id,fn){$(id).addEventListener("input",function(){var v=digits(this.value);this.value=v==null?"":n0(v);fn(v);save();resetCache();refreshSettingsLive()})}
-function refreshIncomeNow(){$("incNow").textContent=ft(income30(today()));var f=$("incFb");f.hidden=!incomeFallback();if(!f.hidden)f.textContent="Még nincs beírt bevétel az elmúlt 30 napban – addig a régi beállítás él: "+ft(+S.settings.incomeExpected)+". Írd be a fizut a Ma fülön a „+ Jött a zsé” gombbal."}
+var PL_30=$("plExplain").textContent,PL_PD="Ennyi zsét szórhatsz el naponta szabadon (kaja, buli, roller…). Számolás: ami a fizuból maradt (a legutóbbi fizunap óta beírt bevételek − fix lehúzások − dugipénz − amit eddig elszórtál), elosztva a következő fizuig hátralévő napokkal. Ha egyik nap kevesebbet szórsz, a többi napra több jut.";
+function refreshIncomeNow(){var t=today(),pd=payDay(),pr=periodOf(t);$("plExplain").textContent=pd?PL_PD:PL_30;$("carryRow").hidden=!!pd;
+  $("incNow").textContent=ft(pd?periodSum(pr,addDays(t,1)).inc:income30(t));$("incHint").textContent=pd?hShort(pr.s)+" óta, a „+ Jött a zsé” beírásokból":"utolsó 30 nap, a „+ Jött a zsé” beírásokból";
+  var f=$("incFb");if(pd){f.hidden=!(rollOn(t)&&rollLimit(t)==null);f.textContent="Ebben a fizu-időszakban ("+hShort(pr.s)+" óta) még nincs beírt bevétel – addig a régi, 30 napos számolás él.";return}
+  f.hidden=!incomeFallback();if(!f.hidden)f.textContent="Még nincs beírt bevétel az elmúlt 30 napban – addig a régi beállítás él: "+ft(+S.settings.incomeExpected)+". Írd be a fizut a Ma fülön a „+ Jött a zsé” gombbal."}
 function refreshSettingsLive(){refreshIncomeNow();$("sugLimit").textContent=ft(suggestedLimit())+" / nap";$("fixedSum").textContent=ft(fixedSum())}
 numInput("saveGoal",function(v){S.settings.savingsGoal=v||0});
 numInput("manLimit",function(v){S.settings.manualLimit=v});
+numInput("payday",function(v){S.settings.payday=v>=1&&v<=31?v:null;if(!S.settings.payday)delete S.settings.paydayFrom;else if(!S.settings.paydayFrom)S.settings.paydayFrom=today()});
 $("fixedList").addEventListener("input",function(e){var el=e.target.closest("[data-fx]");if(!el)return;var v=digits(el.value);el.value=v==null?"":n0(v);
   S.settings.fixed.forEach(function(f){if(f.id===el.dataset.fx)f.amount=v||0});save();resetCache();refreshSettingsLive()});
 $("carry").onchange=function(){S.settings.carry=this.checked;save();resetCache()};
@@ -2082,7 +2163,7 @@ var WGROUPS=[["bank","Bankszámla"],["cash","Készpénz"],["inv","Megtakarítás
 var WTPL=[["Bankszámla","bank"],["Készpénz","cash"],["Revolut","bank"],["Megtakarítás","inv"],["Befektetés","inv"],["Tartalék","inv"]];
 function WACC(){return S.wealth.accts}
 function acctName(id){var x=WACC().filter(function(a){return a.id===id})[0];return x?x.name:"számla"}
-function applyAcct(e,sign){if(!e||!e.acct||!S.wealth)return;var d=(e.type==="in"?1:-1)*sign*e.amount;S.wealth.acc[e.acct]=(+S.wealth.acc[e.acct]||0)+d}
+function applyAcct(e,sign){if(!e||!e.acct||!S.wealth||isPlan(e))return;var d=(e.type==="in"?1:-1)*sign*e.amount;S.wealth.acc[e.acct]=(+S.wealth.acc[e.acct]||0)+d}
 function debtsTotal(){return S.wealth.debts.reduce(function(a,d){return a+d.amount},0)}
 function wealthTotal(){var w=S.wealth,t=0;WACC().forEach(function(a){t+=+w.acc[a.id]||0});return t+debtsTotal()}
 function monthFlow(ym){var inc=0,out=0;S.entries.forEach(function(e){if(e.date.slice(0,7)!==ym||e.debt)return;if(e.type==="in")inc+=e.amount;else if(e.cat!=="jutalom")out+=e.amount});return {inc:inc,out:out}}
@@ -2122,11 +2203,11 @@ function renderVagyon(){ensureWealth();var w=S.wealth,tot=wealthTotal(),h=w.hist
   var prevAcc=base?base.acc:{};
   function ico(a){return '<span class="wico" style="background:'+(WCOLS[a.grp]||WCOLS.other)+'">'+esc((a.name||"?").charAt(0).toUpperCase())+'</span>'}
   function pctChip(cur,prv){if(base==null)return "";var dd=cur-prv;if(!prv&&!dd)return '<span class="pct">0 %</span>';var pc=prv?Math.round(dd/prv*100):null;return '<span class="pct '+(dd>0?"pos":dd<0?"neg":"")+'">'+(dd>0?"+":dd<0?"−":"")+n0(Math.abs(dd))+(pc!=null?" · "+(pc>0?"+":"")+pc+" %":"")+'</span>'}
-  function accRow(a){var cur=+w.acc[a.id]||0;return '<div class="wrow2">'+ico(a)+'<div class="nm">'+esc(a.name)+' <button type="button" class="x" data-wdel-acc="'+a.id+'" aria-label="Számla törlése" style="display:inline-flex;vertical-align:middle;margin-left:2px">×</button><br>'+pctChip(cur,+prevAcc[a.id]||0)+'</div><input id="wa-'+a.id+'" data-wa="'+a.id+'" inputmode="numeric" placeholder="0" value="'+(cur?n0(cur):"")+'"></div>'}
+  function accRow(a){var cur=+w.acc[a.id]||0;return '<div class="wrow2">'+ico(a)+'<div class="nm">'+esc(a.name)+' <button type="button" class="wstar" data-wmain="'+a.id+'" aria-pressed="'+(w.main===a.id)+'" aria-label="Költős számla">★</button><button type="button" class="x" data-wdel-acc="'+a.id+'" aria-label="Számla törlése" style="display:inline-flex;vertical-align:middle;margin-left:2px">×</button><br>'+pctChip(cur,+prevAcc[a.id]||0)+'</div><input id="wa-'+a.id+'" data-wa="'+a.id+'" inputmode="numeric" placeholder="0" value="'+(cur?n0(cur):"")+'"></div>'}
   if(!WACC().length){$("wAcc").innerHTML='<div class="empty">Még nincs számlád. Írd be, amid van – a bankszámlád, a készpénzed, a megtakarításod. Gyors kezdés:</div><div class="wtpl">'+WTPL.map(function(t,i){return '<button type="button" data-wtpl="'+i+'">+ '+t[0]+'</button>'}).join("")+'</div>'}
   else $("wAcc").innerHTML=WGROUPS.map(function(g){var rows=WACC().filter(function(a){return (a.grp||"other")===g[0]});if(!rows.length)return "";var sum=rows.reduce(function(t,a){return t+(+w.acc[a.id]||0)},0);
     return '<div class="wgrp'+(w.coll[g[0]]?" closed":"")+'" data-grp="'+g[0]+'"><div class="wgrp-h" role="button"><span class="label">'+g[1]+'</span><span class="sum num">'+ft(sum)+'</span><span class="chev">▾</span></div><div class="wgrp-b">'+rows.map(accRow).join("")+'</div></div>'}).join("")+
-    (w.debts.length?'<div class="wgrp"><div class="wgrp-h" role="button" data-go-debt><span class="label">Neked tartoznak</span><span class="sum num">'+ft(debtsTotal())+'</span><span class="chev">›</span></div></div>':"");
+    (w.debts.length?'<div class="wgrp"><div class="wgrp-h" role="button" data-go-debt><span class="label">Neked tartoznak</span><span class="sum num">'+ft(debtsTotal())+'</span><span class="chev">›</span></div></div>':"")+'<p class="muted" style="font-size:12px;margin:10px 2px 0">★ = költős számla (pl. OTP): kiadásnál ez lesz alapból kijelölve, és a kipipált fix lehúzások is erről jönnek le.</p>';
   $("wDebts").innerHTML=w.debts.length?w.debts.map(function(dd){return '<div class="wrow2 noico"><div class="nm">'+esc(dd.who)+'<small>'+ft(dd.amount)+(dd.since?" · "+dd.since:"")+'</small></div><div style="display:flex;gap:6px;align-items:center"><button type="button" class="btn" data-debt-got="'+dd.id+'" style="padding:8px 12px;font-size:13px">Megjött</button><button type="button" class="x" data-debt-del="'+dd.id+'" aria-label="Törlés">×</button></div></div>'}).join(""):'<div class="empty">Senki nem tartozik neked.</div>';
   var already=h.some(function(x){return x.ym===ym});
   $("wSnap").textContent=already?"Havi összesítés frissítése":"Havi összesítés rögzítése";$("wSnap").disabled=!WACC().length&&!w.debts.length;
@@ -2140,7 +2221,7 @@ document.querySelector(".wsub").addEventListener("click",function(e){var b=e.tar
 document.querySelector(".wgsel").addEventListener("click",function(e){var b=e.target.closest("[data-wg]");if(!b)return;wNewGrp=b.dataset.wg;document.querySelectorAll(".wgsel button").forEach(function(x){x.setAttribute("aria-pressed",x===b)})});
 $("wNewToggle").onclick=function(){var x=$("wNewBox");x.hidden=!x.hidden;if(!x.hidden)$("wNewName").focus()};
 $("wDebtToggle").onclick=function(){var x=$("wDebtBox");x.hidden=!x.hidden;if(!x.hidden)$("wDebtWho").focus()};
-$("wAcc").addEventListener("click",function(e){var t=e.target.closest("[data-wtpl]");if(t){var tp=WTPL[+t.dataset.wtpl];wNewGrp=tp[1];$("wNewName").value=tp[0];$("wNewBox").hidden=false;document.querySelectorAll(".wgsel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.wg===wNewGrp)});$("wNewAmt").focus();return}
+$("wAcc").addEventListener("click",function(e){var sm=e.target.closest("[data-wmain]");if(sm){S.wealth.main=S.wealth.main===sm.dataset.wmain?null:sm.dataset.wmain;save();renderVagyon();toast(S.wealth.main?"Költős számla: "+acctName(S.wealth.main)+" – kiadásnál ez lesz alapból kijelölve":"Nincs kijelölt költős számla");return}var t=e.target.closest("[data-wtpl]");if(t){var tp=WTPL[+t.dataset.wtpl];wNewGrp=tp[1];$("wNewName").value=tp[0];$("wNewBox").hidden=false;document.querySelectorAll(".wgsel button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.wg===wNewGrp)});$("wNewAmt").focus();return}
   var b=e.target.closest("[data-wdel-acc]");if(b){var id=b.dataset.wdelAcc,c=WACC().filter(function(x){return x.id===id})[0];if(!c)return;
     S.wealth.accts=WACC().filter(function(x){return x.id!==id});var bal=S.wealth.acc[id];delete S.wealth.acc[id];save();renderVagyon();
     toast("Számla törölve: "+c.name,function(){S.wealth.accts.push(c);S.wealth.acc[id]=bal;save();renderVagyon()});return}
@@ -2172,7 +2253,7 @@ $("wDebtForm").addEventListener("submit",function(e){e.preventDefault();var a=di
 /* számla-választó a tétel beírásakor (csak ha van számla) */
 var wAcctSel=null;
 function renderEntryAccts(t){var has=WACC().length>0,L=$("acctLabel"),G=$("accts");L.hidden=!has;G.hidden=!has;if(!has){wAcctSel=null;return}
-  wAcctSel=S[t==="in"?"lastInAcct":"lastOutAcct"]||null;if(wAcctSel&&!WACC().some(function(a){return a.id===wAcctSel}))wAcctSel=null;
+  wAcctSel=(t==="out"&&mainAcct()?mainAcct().id:S[t==="in"?"lastInAcct":"lastOutAcct"])||null;if(wAcctSel&&!WACC().some(function(a){return a.id===wAcctSel}))wAcctSel=null;
   L.textContent=t==="out"?"Melyik számláról ment? (nem kötelező)":"Hova érkezett? (nem kötelező)";
   G.innerHTML=WACC().map(function(a){return '<button type="button" data-acct="'+a.id+'" aria-pressed="'+(a.id===wAcctSel)+'">'+esc(a.name)+'</button>'}).join("")}
 $("accts").addEventListener("click",function(e){var b=e.target.closest("[data-acct]");if(!b)return;wAcctSel=wAcctSel===b.dataset.acct?null:b.dataset.acct;$("accts").querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.acct===wAcctSel)})});
@@ -2274,7 +2355,7 @@ function codeStart(){var COL=["🔴","🟠","🟡","🟢","🔵","🟣"],secret=
   c.addEventListener("mousedown",function(e){});c.addEventListener("mousemove",function(e){});window.addEventListener("mouseup",function(e){if(!$("game").hidden){}})})();
 
 /* ---------- Mi változott? (egyszeri útmutató) ---------- */
-var WN_VER="3",WN_STEPS=[{"e": "💸", "t": "Változott a jövedelem", "p": "Rövid, 2 lapos. Fél perc, spanom.", "l": []}, {"e": "📥", "t": "A jövedelem = amit beírsz", "p": "A Gépházban nincs többé „várható” lé. A jövedelem az, amit a „+ Jött a zsé” gombbal beírsz (az utolsó 30 nap).", "l": [["➕", "Minden beírt bevétel azonnal növeli a jövedelmet és vele a napi plafont."], ["🧾", "Ezért írd be a fizut is, ne csak a pluszokat – különben kicsi lesz a plafon."], ["⏳", "Amíg nincs beírt bevétel, a régi beállításod él."]]}, {"e": "💳", "t": "Beírásnál két koppintás", "p": "A „+ Jött a zsé” lapon:", "l": [["1️⃣", "Hogyan jött: Készpénz, Bankkártya / utalás, Revolut vagy Más."], ["2️⃣", "Mi volt ez: Fizu, Kapott zsé, …"], ["💡", "A legutóbbi módot megjegyzi, úgyhogy általában elég a kategóriára koppintani."]]}];
+var WN_VER="4",WN_STEPS=[{"e": "🍓", "t": "Anna kérései bent vannak", "p": "Rövid, 3 lapos. Fél perc, spanom.", "l": []}, {"e": "📅", "t": "Fizutól fizuig", "p": "Gépház → Fizunap: írd be, hányadikán jön a fizu (pl. 6).", "l": [["🧮", "A napi plafon = ami a fizuból maradt, elosztva a következő fizuig hátralévő napokkal."], ["🌱", "Ha egyik nap kevesebbet szórsz, a többi napra több jut – és fordítva."], ["⏩", "Ha a fizu 1–4 nappal korábban jön, már a következő időszakhoz számolom."]]}, {"e": "📊", "t": "Hol tartok + kiment pipa", "p": "A Ma fülön új kártya: mennyi lé maradt összesen a fizuig.", "l": [["✓", "Fix lehúzások: koppints rá, és pipáld ki, ami már kiment."], ["⏳", "Kiadásnál: „Még nem ment ki” – ha később megy ki, koppints rá a „kiment” gombra."], ["⭐", "Vagyon: tegyél csillagot az OTP-re – kiadásnál az lesz kijelölve, és magától lejön róla a lé."]]}];
 var wnI=0;
 function wnShow(){var st=WN_STEPS[wnI],last=wnI===WN_STEPS.length-1;
   $("wnKick").textContent=wnI===0?"Mi változott?":(wnI)+" / "+(WN_STEPS.length-1);
