@@ -34,7 +34,11 @@ Teszthez kell: `npm i playwright && npx playwright install chromium`.
 
 ## 3. Hol tart most (2026-11-08)
 
-**Élesben:** `sw.js` = `blutti-v17` (2026-11-08, Anna kérései + minitérkép-javítás). A v17 újdonságai:
+**Élesben:** `sw.js` = `blutti-v18` (2026-11-08).
+
+**v18 – Lélek fül kivezetve** (Anna kérte: a lélekcsiholós kiadásokat a napi kiadások közt vezeti). A nav-gomb törölve (8 fül, `repeat(8,1fr)`); a `#v-lelek` szekció és `renderLelek()` holt kódként bent maradt (sosem nyílik meg). `lelekFixed()` mindig 0 → a HAPPY kategóriák (csoki, kávé, progi…) a napi plafonba számítanak; a `lelek` fix sor az adatban megmarad (`ensureGoals` visszarakja), de `fixedSum()` és a Gépház fix-listája kihagyja.
+
+**v17 újdonságai:**
 - **Fizunap** (`S.settings.payday`, Gépház): ha meg van adva, a napi plafon gördülő: (az időszak bevételei − `fixedSum()` − dugipénz − az időszakban eddig, a mai nap előttig elköltött) ÷ hátralévő napok a következő fizuig, 100-ra lefelé kerekítve (`rollLimit`). Időszak: `periodOf(d)` → `{s,e}` (fizunaptól a következő fizunapig, `e` kizárt); fizunap nélkül naptári hónap. A fizunap előtt 1–4 nappal beírt `fizu` már a következő időszaké (`incPeriodStart`). Csak `S.settings.paydayFrom`-tól él (`rollOn`), a régi napok értékelése nem változik. Gördülő módban nincs `bigShare` és nincs `carry` (a carry-kapcsoló rejtve). Ha az időszakban még nincs bevétel → régi 30 napos számolás + figyelmeztetés.
 - **Hol tartok kártya** a Ma fülön (`renderHt`, `#htCard`): maradt = bevétel − fix − dugipénz − elszórva (`periodSum`). Fix lehúzások lenyitva „✓ kiment” pipával (`S.fixPaid[időszak-kezdet][fixId]={a:számla,v:összeg}`) – kipipáláskor a költős számláról levonja, visszavéve visszaadja.
 - **Tervezett kiadás:** beíráskor „⏳ Még nem ment ki” (`e.plan`), kipipálva `e.paid=dátum`. Amíg `isPlan(e)`, `applyAcct` nem mozgatja a számlát. A tervezett tétel nem a napi szórásba (`dayData().plan`) megy, hanem gördülő módban a következő napoktól az időszaki keretbe.
@@ -47,7 +51,7 @@ Korábbi (v16-ig) tartalom:
 - **Bevétel beírásakor kötelező két koppintás:** „Hogyan jött?” (`VIAS`: Készpénz / Bankkártya-utalás / Revolut / Más → `e.via`, utolsó megjegyezve `S.lastVia`) és kategória (`IN_CATS`: Fizu, Kapott zsé, Mellékes, Más lé). A via-koppintás **nem** ment, a kategória-koppintás ment (ha van összeg). A Napló sor és a Bevétel kártya mutatja a módot.
 - Vagyon fül (saját számlák, Anna maga veszi fel; tartozások „neked tartoznak”), bővíthető havi fix lehúzások, dugipénz/célok.
 - Játék fül: **Tündér Quest** (3D nyílt világú akció-RPG, zseton nélkül játszható) + Memória, Tologatós (8-puzzle), Színkód (mastermind) zsetonért. Zseton = 7 lezárt nap a kihívásban.
-- Liquid glass téma Anna színeivel (világos, pasztell), animációk, egyszeri „Mi változott?” útmutató (`WN_VER="3"`, `S.settings.wn`).
+- (v18 óta nincs Lélek fül.) Liquid glass téma Anna színeivel (világos, pasztell), animációk, egyszeri „Mi változott?” útmutató (`WN_VER="3"`, `S.settings.wn`).
 - Service worker frissítés-javítás: install `fetch(..., {cache:"reload"})`, lekérés `no-cache`, új verziónál a lap egyszer újratölt (`controllerchange`), előtérbe hozáskor `reg.update()`.
 
 **Forrásban kész, de még nincs kint:** semmi – a `src/` és az élő egyezik.

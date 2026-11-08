@@ -395,7 +395,7 @@ input,textarea,.field input,.addbox input,.addfix input,.row input,.note{backgro
 .sheet{background:var(--glass-strong);backdrop-filter:blur(30px) saturate(1.6);-webkit-backdrop-filter:blur(30px) saturate(1.6);border:1px solid var(--glass-line);border-radius:28px 28px 22px 22px;box-shadow:0 -10px 40px rgba(0,0,0,.18)}
 .sheet.ok{background:linear-gradient(rgba(234,247,239,.8),var(--glass-strong))}.sheet.bad{background:linear-gradient(rgba(253,233,236,.85),var(--glass-strong))}
 nav.tabs{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));padding:0;border:1px solid var(--glass-line);border-top-color:var(--glass-line);border-radius:28px;background:rgba(255,255,255,.64);backdrop-filter:blur(26px) saturate(1.6);-webkit-backdrop-filter:blur(26px) saturate(1.6);box-shadow:0 12px 36px rgba(229,138,171,.14)}
-nav.tabs .in{padding:6px 3px;position:relative;grid-template-columns:repeat(9,1fr)}
+nav.tabs .in{padding:6px 3px;position:relative;grid-template-columns:repeat(8,1fr)}
 nav.tabs button{font-size:9px;padding:8px 0;border-radius:18px;letter-spacing:-.01em;gap:3px;position:relative;z-index:1;min-width:0}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{background:transparent;color:#C9517F}
@@ -971,7 +971,6 @@ body::before{background:transparent}
 
 <nav class="tabs" aria-label="Fülek"><div class="in">
   <button type="button" data-tab="ma" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Ma</button>
-  <button type="button" data-tab="lelek"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Lélek</button>
   <button type="button" data-tab="vit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="8" rx="4" transform="rotate(-35 12 13)"/><path d="M9.5 8.5l5 7"/></svg>Vitamin</button>
   <button type="button" data-tab="bolt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h2l2.4 11h11.2L21 7H6.2"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg>Bolt</button>
   <button type="button" data-tab="vagyon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16M6 16V10M10 16V6M14 16v-4M18 16V8"/></svg>Vagyon</button>
@@ -1130,7 +1129,7 @@ if(!S.closed)S.closed={};if(!S.ack)S.ack={};
 function ensureGoals(){if(!S.goals)S.goals=[];if(!S.vit)S.vit={};if(!S.settings.fixed.some(function(f){return f.id==="lelek"}))S.settings.fixed.unshift({id:"lelek",name:"Lélekcsiholó keret",amount:0})}ensureGoals();
 var HAPPY=["csoki","kave","progi","ajcsi","anyukaja","ruci"];
 function isHappy(c){return HAPPY.indexOf(c)>=0}
-function lelekFixed(){var f=S.settings.fixed.filter(function(x){return x.id==="lelek"})[0];return f?(+f.amount||0):0}
+function lelekFixed(){return 0} // a Lélek fül kivezetve: minden lélekcsiholó kiadás a napi plafonba megy
 function happySpent(a,b){return S.entries.reduce(function(s,e){return s+(e.type==="out"&&isHappy(e.cat)&&e.date>=a&&e.date<=b?e.amount:0)},0)}
 
 /* ---------- számolás ---------- */
@@ -1139,7 +1138,7 @@ function ft(n){return fmt.format(Math.round(n))+" Ft"}
 function n0(n){return fmt.format(Math.round(n))}
 function k(n){var a=Math.abs(n);return (n<0?"−":"")+(a>=1e6?(a/1e6).toFixed(2).replace(".",",")+" M":a>=1e4?Math.round(a/1000)+" e":fmt.format(Math.round(a)))}
 
-function fixedSum(){return S.settings.fixed.reduce(function(a,f){return a+(+f.amount||0)},0)}
+function fixedSum(){return S.settings.fixed.reduce(function(a,f){return a+(f.id==="lelek"?0:+f.amount||0)},0)}
 function histIncomeMonthly(){
   var end=today(),start=addDays(end,-60),sum=0;
   S.entries.forEach(function(e){if(e.type==="in"&&e.date>=start&&e.date<end)sum+=e.amount});
@@ -1484,9 +1483,9 @@ function renderSettings(){
   $("sugLimit").textContent=ft(suggestedLimit())+" / nap";
   $("carry").checked=!!st.carry;
   if(!$("fixedList").children.length){
-    $("fixedList").innerHTML=st.fixed.map(function(f){return '<div class="field"><label for="fx-'+f.id+'">'+esc(f.name)+(f.id==="lelek"?'<small>csoki, kávé, progi, aji, kaja anyuval, ponyva – ha megadod, ezek nem viszik a napi plafont</small>':'')+(String(f.id).indexOf("c_")===0?'<button type="button" class="x" data-fxdel="'+f.id+'" aria-label="Sor törlése" style="margin-left:6px">×</button>':'')+'</label><input id="fx-'+f.id+'" data-fx="'+f.id+'" inputmode="numeric" placeholder="0"></div>'}).join("");
+    $("fixedList").innerHTML=st.fixed.filter(function(f){return f.id!=="lelek"}).map(function(f){return '<div class="field"><label for="fx-'+f.id+'">'+esc(f.name)+(f.id==="lelek"?'<small>csoki, kávé, progi, aji, kaja anyuval, ponyva – ha megadod, ezek nem viszik a napi plafont</small>':'')+(String(f.id).indexOf("c_")===0?'<button type="button" class="x" data-fxdel="'+f.id+'" aria-label="Sor törlése" style="margin-left:6px">×</button>':'')+'</label><input id="fx-'+f.id+'" data-fx="'+f.id+'" inputmode="numeric" placeholder="0"></div>'}).join("");
   }
-  st.fixed.forEach(function(f){setVal("fx-"+f.id,f.amount?n0(f.amount):"")});
+  st.fixed.forEach(function(f){if(f.id!=="lelek")setVal("fx-"+f.id,f.amount?n0(f.amount):"")});
   $("fixedSum").textContent=ft(fixedSum());
   $("storeWarn").textContent=storageOK?"":"Figyelem: ez a böngésző nem engedi a mentést, bezáráskor elvesznek az adatok. Nyisd meg Safariban.";
 }
